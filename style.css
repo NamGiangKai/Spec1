@@ -1,3 +1,9 @@
+@font-face {
+    font-family: "AmarilloUSAF";
+    src: url("D:\đwdw\fonts\AmarilloUSAF.ttf") format("truetype");
+    font-style: normal;
+}
+
 /* --- FONT & GENERAL SETUP --- */
 body {
     background-color: #000;
@@ -31,170 +37,283 @@ body {
 }
 
 /* --- PHẦN 1: DEKAY --- */
-.top-section{display:flex;align-items:center;justify-content:center;gap:3rem;width:100%;margin-bottom:18rem}.quote-container{flex-basis:50%;max-width:480px}.quote{font-size:20px;font-weight:700;line-height:1.6;letter-spacing:1.5px;text-shadow:0 0 5px rgba(255,255,255,.3)}.attribution{text-align:right;margin-top:1rem;font-size:1.3rem;font-weight:400;letter-spacing:2px}.separator{width:2px;height:150px;background-color:rgba(255,255,255,.5)}.logo-container{flex-basis:50%;text-align:center}.logo{font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:-10px;line-height:1;margin:0}.logo .char-large{font-size:10rem;text-shadow:0 0 15px rgba(255,0,0,.7)}.logo .char-small{font-size:5.5rem;vertical-align:middle;letter-spacing:0;text-shadow:0 0 10px rgba(255,255,255,.5)}.new-section{text-align:center;max-width:900px;margin:0 auto;padding:0 1rem}.section-number{font-family:'Orbitron',sans-serif;font-size:15rem;font-weight:900;line-height:1;color:rgba(224,34,58,.8);text-shadow:0 0 20px rgba(224,34,58,.6);margin-bottom:2rem;display:flex;justify-content:center;overflow:hidden;height:15rem}.digit-container{height:15rem;overflow:hidden}.digit{transition:transform 2s cubic-bezier(.68,-.55,.27,1.55)}.digit.running{transition:transform .1s linear}.digit div{height:15rem;line-height:15rem}.section-title{font-size:1.8rem;letter-spacing:3px;margin-bottom:1.5rem;text-transform:uppercase}.section-paragraph{font-size:1rem;line-height:1.8;letter-spacing:1px;opacity:.9;margin-bottom:2rem}.section-call-to-action{font-weight:700;font-size:1.1rem;letter-spacing:2px;color:#e0223a}.site-footer{width:100%;max-width:1200px;margin:10rem auto 0;padding-top:2rem;border-top:1px solid rgba(255,255,255,.2);display:flex;justify-content:space-between;font-size:.8rem;opacity:.8}.footer-left,.footer-right{display:flex;flex-direction:column}.footer-left span,.student-info,.semester-info{margin-bottom:.5rem}.student-list{display:flex;gap:2rem}.student-info span{display:block}
-
-/* --- ARTWORK CONTAINER (PHẦN MỚI) --- */
-.artwork-container {
-  position: relative; /* Rất quan trọng: tạo hệ quy chiếu cho lớp overlay */
-  width: 100%;
-  height: 600px; /* Chiều cao của khu vực sketch, bạn có thể thay đổi */
-  margin-top: 5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-sizing: border-box;
-}
-
-/* Container cho p5.js canvas */
-#p5-canvas-container {
-  width: 100%;
-  height: 100%;
-}
-
-/* Lớp văn bản nằm đè lên */
-.artwork-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  padding: 40px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  pointer-events: none;
-  margin-top: 90px; /* Cho phép click xuyên qua lớp này */
-}
-
-/* Định dạng đoạn mô tả */
-.artwork-description {
-  font-family: 'VCR OSD Mono', monospace;
-  font-size: 14px;
-  
-  line-height: 1.7;
-  color: white;
-  max-width: 450px;
-  margin: 0;
-  margin-top: 90px;
-}
-
-/* Định dạng khối tiêu đề */
-.artwork-title {
-  font-family: 'Orbitron', sans-serif; /* Hoặc một font sans-serif đậm khác */
-  font-weight: 900;
-  color: white;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.artwork-title .title-line-1 {
-  display: block;
-  font-size: 50px;
-  margin-bottom: 10px;
-}
-
-.artwork-title .title-line-2 {
-  display: block;
-  font-size: 100px;
-}
-
-
-.quote-container {
-    flex-basis: 50%;
-    max-width: 480px;
-}
-
-.quote {
-    font-size: 20px;
-    font-weight: bold;
-    line-height: 1.4;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+.top-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    margin-bottom: 18rem;
 }
 
 .attribution {
-    font-size: 1.6rem;
+    text-align: right;
     margin-top: 1.5rem;
+    font-size: 1.6rem;
+    font-weight: 400;
+    letter-spacing: 2px;
     text-transform: uppercase;
 }
 
 .separator {
-    width: 2px;
-    background-color: #fff;
+    width: 5px;
     height: 160px;
+    background-color: lightgray;
 }
 
 .logo-container {
+    font-family: 'AmarilloUSAF', sans-serif;
     flex-basis: 40%;
+    text-align: center;
 }
 
 .logo {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900;
+    letter-spacing: -10px;
     line-height: 1;
+    margin: 0;
     color: #fff;
     display: flex;
     align-items: baseline;
-    gap: 0.1rem;
 }
 
 .logo .char-large {
+    font-family: 'AmarilloUSAF', sans-serif;
     font-size: 9rem;
+    margin-right: 10px;
+    text-shadow: 0 0 8px rgba(255, 0, 0, .5); 
+    font-weight: 400;
 }
 
 .logo .char-small {
+    font-family: 'AmarilloUSAF', sans-serif;
     font-size: 5rem;
-    transform: translateY(-0.05em); 
+    margin-right: 10px;
+    text-shadow: 0 0 5px rgba(255, 255, 255, .3);
+    font-weight: 400; 
 }
 
-/* --- PHẦN 2: SỐ 13 --- */
 .new-section {
-    width: 100%;
     text-align: center;
+    margin: 0 auto;
     padding: 0 3rem;
 }
 
-/* CSS MỚI CHO HIỆU ỨNG 2 CỘT SỐ */
+.separator-line {
+    width: 40px;
+    height: 340px;
+    background-color: black;
+    position: absolute;
+    transform: rotate(40deg); 
+    z-index: 9999;
+}
 .section-number {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900;
+    font-family: 'AmarilloUSAF', sans-serif;
     font-size: 15rem;
+    font-weight: 900;
     line-height: 1;
-    margin-bottom: 2rem;
     color: #fff;
+    text-shadow: 0 slot 20px rgba(224, 34, 58, .6);
+    margin-bottom: 2rem;
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
+    height: 15rem;
 }
 
 .digit-container {
-    height: 15rem; /* Chiều cao bằng font-size */
+    height: 15rem;
     overflow: hidden;
 }
 
 .digit {
     display: block;
-    /* THAY ĐỔI Ở ĐÂY: Tăng thời gian transition để hiệu ứng chậm hơn */
-    transition: transform 2.5s cubic-bezier(0.23, 1, 0.32, 1); 
+    transition: transform 2.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.digit.running {
+    transition: transform .1s linear;
 }
 
 .digit div {
-    height: 15rem; /* Chiều cao của từng số */
+    height: 15rem;
+    line-height: 15rem;
+}
+
+.section-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    letter-spacing: 2x;
+    margin-bottom: 2.5rem;
+    text-align: center;
+    width: 100%;
+}
+
+.section-paragraph {
+    font-family: "Source Code Pro", monospace;
+    font-size: 1rem;
+    line-height: 1.8;
+    opacity: .9;
+    margin-bottom: 3rem;
+    text-align: left;
+}
+
+.section-call-to-action {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    color: #fff;
+    opacity: 0.8;
+    text-transform: uppercase;
+}
+
+.site-footer {
+    width: 100%;
+    max-width: 1200px;
+    margin: 10rem auto 0;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, .2);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: .8rem;
+    opacity: .8;
+}
+
+.footer-left,
+.footer-right {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-left span,
+.student-info,
+.semester-info {
+    margin-bottom: .5rem;
+}
+
+.student-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.student-info {
+    display: flex;
+    justify-content: space-between;
+    width: 350px;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.student-info span {
+    display: block;
+}
+
+/* --- ARTWORK CONTAINER --- */
+.artwork-container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    margin-top: 5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-sizing: border-box;
+}
+
+/* Container cho p5.js canvas */
+#p5-canvas-container,
+#p5-centipede-canvas {
+    width: 100%;
+    height: 675px;
+    margin-top: 5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-sizing: border-box;
+    position: relative;
+    z-index: -9;
+}
+
+/* Lớp văn bản nằm đè lên */
+.artwork-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 40px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+    margin-top: 90px;
+}
+
+/* Định dạng đoạn mô tả */
+.artwork-description {
+    font-family: "Source Code Pro", monospace;
+    font-size: 15px;
+    line-height: 1.7;
+    color: white;
+    max-width: 450px;
+    margin: 0;
+    margin-top: 90px;
+}
+
+/* Định dạng khối tiêu đề */
+.artwork-title {
+    font-family: 'AmarilloUSAF', sans-serif;
+    font-weight: 900;
+    color: white;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.artwork-title .title-line-1 {
+    display: block;
+    font-size: 50px;
+    margin-bottom: 10px;
+}
+
+.artwork-title .title-line-2 {
+    display: block;
+    font-size: 100px;
+}
+
+.quote-container {
+    width: 1000px;
+}
+
+.quote-container .quote {
+    font-family: 'AmarilloUSAF', sans-serif;
+    font-size: 23px;
+    font-weight: bold;
+    line-height: 1.4;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    left: -20px;
 }
 
 /* Animation cho lúc chạy nhanh */
 @keyframes scrollUp {
-    from { transform: translateY(0); }
-    to { transform: translateY(-50%); }
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(-50%);
+    }
 }
 
 @keyframes scrollDown {
-    from { transform: translateY(-50%); }
-    to { transform: translateY(0); }
+    from {
+        transform: translateY(-50%);
+    }
+    to {
+        transform: translateY(0);
+    }
 }
 
 .digit-container.running #digit1 {
     animation: scrollUp 0.5s linear infinite;
-    transition: none; /* Bỏ transition khi đang chạy nhanh */
+    transition: none;
 }
 
 .digit-container.running #digit2 {
@@ -202,148 +321,118 @@ body {
     transition: none;
 }
 
-
-.section-title {
-    font-size: 1.8rem;
-    font-weight: bold;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-top: 2rem; /* Thêm khoảng cách với số */
-    margin-bottom: 2.5rem;
-}
-
-.section-paragraph {
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-bottom: 3rem;
-    max-width: 850px;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: justify;
-    opacity: 0.9;
-}
-
-.section-call-to-action {
-    font-size: 1.1rem;
-    font-weight: bold;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: #fff;
-    opacity: 0.8;
-}
-
-/* --- PHẦN 3: THÔNG TIN SINH VIÊN --- */
-.site-footer {
-    width: 100%;
-    max-width: 1200px;
-    margin: 10rem auto 0;
-    padding-top: 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start; /* Căn chỉnh các cột theo phía trên */
-    font-size: 0.8rem;
-    opacity: 0.8;
-}
-
-.footer-left {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.footer-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end; /* Căn chỉnh toàn bộ nội dung sang phải */
-}
-
-.footer-left span {
-    margin-bottom: 0.5rem;
-}
-
-.student-list {
-    display: flex;
-    flex-direction: column; /* Xếp chồng thông tin sinh viên theo chiều dọc */
-    gap: 0.5rem; /* Khoảng cách giữa các hàng sinh viên */
-    margin-bottom: 2rem; /* Khoảng cách giữa danh sách SV và học kỳ */
-}
-
-.student-info {
-    display: flex;
-    justify-content: space-between; /* Đẩy tên và mã số SV ra hai bên */
-    width: 350px; /* Đặt chiều rộng cố định để căn chỉnh đẹp hơn */
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Thêm đường kẻ ngang */
-}
-
-/* Thêm vào file style.css */
-#p5-canvas-container {
-  width: 100%;
-
-  /* Đặt một chiều cao cụ thể cho khu vực sketch */
-  height: 675px; 
-  /* Tạo khoảng cách với phần nội dung bên trên */
- 
-
-  /* Giữ lại các thuộc tính khác */
-  margin-top: 5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-sizing: border-box;
-
-  /* Giữ lại z-index đã sửa */
-  position: relative;
-  z-index: -9; 
-}
-#p5-centipede-canvas {
-width: 100%;
- 
-  /* Đặt một chiều cao cụ thể cho khu vực sketch */
-  height: 675px; 
-  /* Tạo khoảng cách với phần nội dung bên trên */
-  margin-top: 5rem;
-  /* Thêm một đường viền mờ để dễ dàng thấy khu vực của canvas */
- 
-
-  /* Giữ lại các thuộc tính khác */
-  margin-top: 5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-sizing: border-box;
-
-  /* Giữ lại z-index đã sửa */
-  position: relative;
-  z-index: -9; 
-}
 /* --- RESPONSIVE DESIGN --- */
 @media (max-width: 1024px) {
-    .top-section { flex-direction: column; text-align: center; gap: 2.5rem; margin-bottom: 8rem; }
-    .separator { display: none; }
-    .logo .char-large { font-size: 8rem; }
-    .logo .char-small { font-size: 4.5rem; }
+    .top-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 2.5rem;
+        margin-bottom: 8rem;
+    }
 
-    .new-section { padding: 0 2rem; }
-    .section-number, .digit-container, .digit div { font-size: 12rem; height: 12rem; }
-    .section-title { font-size: 1.6rem; }
-    .section-paragraph { font-size: 0.95rem; }
+    .separator {
+        display: none;
+    }
+
+    .logo .char-large {
+        font-size: 8rem;
+    }
+
+    .logo .char-small {
+        font-size: 4.5rem;
+    }
+
+    .new-section {
+        padding: 0 2rem;
+    }
+
+    .section-number,
+    .digit-container,
+    .digit div {
+        font-size: 12rem;
+        height: 12rem;
+    }
+
+    .section-title {
+        font-size: 1.6rem;
+    }
+
+    .section-paragraph {
+        font-size: 0.95rem;
+    }
 }
 
 @media (max-width: 768px) {
-    body { padding: 1.5rem; }
-    .site-header { margin-bottom: 3rem; }
-    .top-section { margin-bottom: 6rem; }
-    .quote { font-size: 20px; }
-    .attribution { font-size: 1.2rem; }
-    .logo .char-large { font-size: 6rem; }
-    .logo .char-small { font-size: 3.5rem; }
+    body {
+        padding: 1.5rem;
+    }
 
-    .new-section { padding: 0 1rem; }
-    .section-number, .digit-container, .digit div { font-size: 9rem; height: 9rem; }
-    .section-title { font-size: 1.4rem; }
-    .section-paragraph { font-size: 0.9rem; text-align: left; }
-    .section-call-to-action { font-size: 1rem; }
+    .site-header {
+        margin-bottom: 3rem;
+    }
 
-    .site-footer { flex-direction: column; align-items: center; text-align: center; gap: 2.5rem; margin-top: 6rem; }
-    .footer-left { flex-direction: column; gap: 0.5rem; }
-    .footer-right { align-items: center; }
-    .student-info { width: 300px; }
+    .top-section {
+        margin-bottom: 6rem;
+    }
+
+    .quote {
+        font-size: 20px;
+    }
+
+    .attribution {
+        font-size: 1.2rem;
+    }
+
+    .logo .char-large {
+        font-size: 6rem;
+    }
+
+    .logo .char-small {
+        font-size: 3.5rem;
+    }
+
+    .new-section {
+        padding: 0 1rem;
+    }
+
+    .section-number,
+    .digit-container,
+    .digit div {
+        font-size: 9rem;
+        height: 9rem;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+    }
+
+    .section-paragraph {
+        font-size: 0.9rem;
+        text-align: left;
+    }
+
+    .section-call-to-action {
+        font-size: 1rem;
+    }
+
+    .site-footer {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 2.5rem;
+        margin-top: 6rem;
+    }
+
+    .footer-left {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .footer-right {
+        align-items: center;
+    }
+
+    .student-info {
+        width: 300px;
+    }
 }
