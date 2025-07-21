@@ -221,7 +221,8 @@ body {
 
 /* Container cho p5.js canvas */
 #p5-canvas-container,
-#p5-centipede-canvas {
+#p5-centipede-canvas,
+#p5-dekay-canvas {
     width: 100%;
     height: 675px;
     margin-top: 5rem;
