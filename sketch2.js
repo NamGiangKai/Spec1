@@ -1,11 +1,7 @@
-const sketch2 = (p) => {
-  // ===================================================
-  // GLOBAL VARIABLES
-  // ===================================================
-
+const sketch = (p) => {
   let myCentipede;
+
   let particles = [];
-  // Giữ nguyên số lượng hạt đã giảm để cải thiện hiệu suất
   const numParticles = 70;
   let rotationY = 0;
   let rotationX = 0;
@@ -22,15 +18,12 @@ const sketch2 = (p) => {
   let clickCounter = 0;
   const maxClicksForTransition = 10;
 
-  // ===================================================
-  // P5.JS MAIN FUNCTIONS
-  // ===================================================
-
-  p.setup = () => {
+   p.setup = () => {
     let canvasContainer = p.select('#p5-centipede-canvas');
     let canvas = p.createCanvas(canvasContainer.width, canvasContainer.height);
     canvas.parent('p5-centipede-canvas');
     p.colorMode(p.HSB, 360, 100, 100, 100);
+
 
     uncannyBg = p.createGraphics(p.width, p.height);
     uncannyBg.colorMode(p.HSB, 360, 100, 100, 100);
@@ -42,9 +35,10 @@ const sketch2 = (p) => {
     endParticleColor = p.color(0, 0, 0);
     currentParticleColor = startParticleColor;
 
-    myCentipede = new Centipede(p.width / 2, p.height / 2, 60, 8, 0.1);
+    myCentipede = new Centipede(p, p.width / 2, p.height / 2, 60, 8, 0.1);
+
     regenerateShape();
-  }
+  };
 
   p.draw = () => {
     let lerpAmt = p.min(1, clickCounter / maxClicksForTransition);
@@ -74,25 +68,21 @@ const sketch2 = (p) => {
       rotationX += rotSpeedX;
     }
 
-    // --- TỐI ƯU HÓA VÒNG LẶP ---
     for (let i = 0; i < particles.length; i++) {
       for (let j = i + 1; j < particles.length; j++) {
         let p1 = particles[i];
         let p2 = particles[j];
         if (p1.state === "stable" && p2.state === "stable") {
+          let d = p1.pos.dist(p2.pos);
           let connectionDistance = 100;
           if (shapeStyle === 1 || shapeStyle === 4) connectionDistance = 150;
           if (shapeStyle === 3) connectionDistance = 120;
-          
-          // TỐI ƯU HÓA: So sánh bình phương khoảng cách để tránh tính căn bậc hai (sqrt)
-          let connectionDistanceSq = connectionDistance * connectionDistance;
-          let dSq = (p1.pos.x - p2.pos.x)**2 + (p1.pos.y - p2.pos.y)**2 + (p1.pos.z - p2.pos.z)**2;
-
-          if (dSq < connectionDistanceSq) {
+          if (d < connectionDistance) {
             let screenP1 = p1.getProjectedPoint();
             let screenP2 = p2.getProjectedPoint();
             let avgZ = (p1.pos.z + p2.pos.z) / 2;
             let alpha = p.map(avgZ, -p.width / 2, p.width / 2, 10, 60);
+
             let c = currentParticleColor;
             p.stroke(p.hue(c), p.saturation(c), p.brightness(c), alpha);
             p.strokeWeight(0.5);
@@ -119,14 +109,13 @@ const sketch2 = (p) => {
       regenerationScheduled = true;
       setTimeout(regenerateShape, 500);
     }
-  }
 
-  // ===================================================
-  // EVENT HANDLERS & HELPERS
-  // ===================================================
+    drawQuote();
+  };
 
   p.mousePressed = () => {
     clickCounter++;
+
     autoRotate = false;
     clickPos.set(p.mouseX, p.mouseY);
     triggerGenerativeEvent();
@@ -142,26 +131,24 @@ const sketch2 = (p) => {
         }
       }
     }
-  }
+  };
 
-  const eventFunctions = [event2, event3, event5];
-
-  function triggerGenerativeEvent() {
+  const triggerGenerativeEvent = () => {
     uncannyBg.clear();
     let numEvents = p.floor(p.random(1, 3));
     let shuffledEvents = p.shuffle(eventFunctions);
+
     for (let i = 0; i < numEvents; i++) {
       shuffledEvents[i](uncannyBg);
     }
     bgAlpha = 200;
-  }
-
-  function event2(buffer) {
+  };
+  
+  const event2 = (buffer) => {
     buffer.background(0, 0, 0);
     let centerX = clickPos.x;
     let centerY = clickPos.y;
-    // TỐI ƯU HÓA: Giảm số lần lặp
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 100; i++) {
       buffer.stroke(0, 0, 100, p.random(50, 100));
       buffer.strokeWeight(p.random(0.5, 2));
       let angle = p.random(p.TWO_PI);
@@ -170,13 +157,12 @@ const sketch2 = (p) => {
       let y2 = centerY + radius * p.sin(angle);
       buffer.line(centerX, centerY, x2, y2);
     }
-  }
+  };
 
-  function event3(buffer) {
+  const event3 = (buffer) => {
     buffer.background(0, 0, 95);
     buffer.stroke(0, 0, 0, 60);
-    // TỐI ƯU HÓA: Giảm số lần lặp
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 50; i++) {
       let x = p.random(p.width);
       let y = p.random(p.height);
       for (let j = 0; j < 100; j++) {
@@ -189,9 +175,9 @@ const sketch2 = (p) => {
         y = nextY;
       }
     }
-  }
+  };
 
-  function event5(buffer) {
+  const event5 = (buffer) => {
     buffer.background(0, 0, 0);
     let planetRadius = p.width * 1.5;
     let planetY = p.height + planetRadius - 150;
@@ -206,29 +192,52 @@ const sketch2 = (p) => {
         buffer.ellipse(x, y, p.random(1, 2.5));
       }
     }
-    // TỐI ƯU HÓA: Giảm mạnh số lần lặp từ 10000 xuống 2000
-    for (let i = 0; i < 2000; i++) {
+    for (let i = 0; i < 10000; i++) {
       buffer.fill(0, 0, 100, p.random(5));
       buffer.rect(p.random(p.width), p.random(p.height), 1, 1);
     }
-  }
+  };
 
-  function regenerateShape() {
+  const eventFunctions = [event2, event3, event5];
+
+  const drawQuote = () => {
+    p.push();
+    const margin = 40;
+    const txtSize = 16;
+    p.textFont('Source Code Pro');
+    p.fill(0, 0, 100, 80);
+    p.noStroke();
+    p.textSize(txtSize);
+    p.textLeading(txtSize * 1.5);
+
+    p.textStyle(p.NORMAL);
+    const originalQuote =
+      "We are facing a man-made disaster on a global scale.\n\n Our greatest threat in thousands of years. Climate change.\n\n" +
+      "-SIR DAVID ATTENBOROUGH";
+    p.textAlign(p.RIGHT, p.TOP);
+    p.text(originalQuote, p.width - margin, margin);
+
+    p.textStyle(p.BOLD);
+    const callToAction = "We must act urgently and \n\ndecisively to protect our \n\nplanet before the damage becomes irreversible.";
+    p.textAlign(p.RIGHT, p.BOTTOM);
+    p.text(callToAction, p.width - margin, p.height - margin);
+
+    p.pop();
+  };
+
+  const regenerateShape = () => {
     shapeStyle = (shapeStyle + 1) % 6;
     particles = [];
     for (let i = 0; i < numParticles; i++) {
-      particles.push(new Particle(i));
+      particles.push(new Particle(p, i));
     }
     autoRotate = true;
     regenerationScheduled = false;
-  }
-
-  // ===================================================
-  // CLASS DEFINITIONS
-  // ===================================================
+  };
 
   class Centipede {
-    constructor(x, y, numSegments, segLength, easing) {
+    constructor(p, x, y, numSegments, segLength, easing) {
+      this.p = p;
       this.segments = [];
       this.legs = [];
       this.easing = easing;
@@ -237,21 +246,21 @@ const sketch2 = (p) => {
       this.gaitTimer = 0;
       this.gaitDuration = 25;
       this.time = 0;
-      this.headColor = p.color(0, 0, 90);
+      this.headColor = this.p.color(0, 0, 90);
 
       for (let i = 0; i < numSegments; i++) {
         let scale = 1 - i / numSegments;
-        scale = p.pow(scale, 1.5);
+        scale = this.p.pow(scale, 1.5);
         let ribLen = this.segLength * 5.8 * scale;
-        this.segments.push(new Segment(x, y, this.segLength, ribLen));
+        this.segments.push(new Segment(p, x, y, this.segLength, ribLen));
       }
 
       for (let i = 5; i < numSegments - 10; i += 7) {
         let scale = 1 - i / numSegments;
-        scale = p.pow(scale, 1.2);
+        scale = this.p.pow(scale, 1.2);
         let legReach = this.segLength * 6 * scale;
-        this.legs.push(new Leg(this.segments[i], 1, legReach));
-        this.legs.push(new Leg(this.segments[i], -1, legReach));
+        this.legs.push(new Leg(p, this.segments[i], 1, legReach));
+        this.legs.push(new Leg(p, this.segments[i], -1, legReach));
       }
     }
 
@@ -294,181 +303,175 @@ const sketch2 = (p) => {
     drawHead() {
       let head = this.segments[0];
       let neck = this.segments[1];
-      let dir = p.constructor.Vector.sub(head.pos, neck.pos);
-      p.push();
-      p.translate(head.pos.x, head.pos.y);
-      p.rotate(dir.heading());
-      p.stroke(this.headColor);
-      p.strokeWeight(1);
-      let antennaAngle = p.sin(this.time * 0.1) * 0.25;
-      p.line(0, 0, 15, -5 + antennaAngle * 15);
-      p.line(0, 0, 15, 5 - antennaAngle * 15);
-      p.fill(this.headColor);
-      p.noStroke();
-      p.beginShape();
-      p.vertex(8, 0);
-      p.vertex(-2, -5);
-      p.vertex(-6, -3);
-      p.vertex(-6, 3);
-      p.vertex(-2, 5);
-      p.endShape(p.CLOSE);
-      p.fill(0, 0, 70);
-      p.triangle(8, 0, 12, -4, 10, 0);
-      p.triangle(8, 0, 12, 4, 10, 0);
-      p.pop();
+      let dir = p5.Vector.sub(head.pos, neck.pos);
+      this.p.push();
+      this.p.translate(head.pos.x, head.pos.y);
+      this.p.rotate(dir.heading());
+      this.p.stroke(this.headColor);
+      this.p.strokeWeight(1);
+      let antennaAngle = this.p.sin(this.time * 0.1) * 0.25;
+      this.p.line(0, 0, 15, -5 + antennaAngle * 15);
+      this.p.line(0, 0, 15, 5 - antennaAngle * 15);
+      this.p.fill(this.headColor);
+      this.p.noStroke();
+      this.p.beginShape();
+      this.p.vertex(8, 0);
+      this.p.vertex(-2, -5);
+      this.p.vertex(-6, -3);
+      this.p.vertex(-6, 3);
+      this.p.vertex(-2, 5);
+      this.p.endShape(this.p.CLOSE);
+      this.p.fill(0, 0, 70);
+      this.p.triangle(8, 0, 12, -4, 10, 0);
+      this.p.triangle(8, 0, 12, 4, 10, 0);
+      this.p.pop();
     }
   }
 
   class Segment {
-    constructor(x, y, len, ribLength) {
-      this.pos = p.createVector(x, y);
-      this.target = p.createVector(x, y);
-      this.len = len;
-      this.ribLength = ribLength;
+    constructor(p, x, y, len, ribLength) {
+        this.p = p;
+        this.pos = this.p.createVector(x, y);
+        this.target = this.p.createVector(x, y);
+        this.len = len;
+        this.ribLength = ribLength;
     }
     follow(targetPos) {
-      let dir = p.constructor.Vector.sub(this.pos, targetPos);
+      let dir = p5.Vector.sub(this.pos, targetPos);
       dir.setMag(this.len);
-      this.target = p.constructor.Vector.add(targetPos, dir);
+      this.target = p5.Vector.add(targetPos, dir);
     }
     update(easing) {
       this.pos.lerp(this.target, easing);
     }
     show(nextSegment) {
-      p.stroke(0, 0, 90, 85);
-      p.strokeWeight(1.5);
-      p.line(this.pos.x, this.pos.y, nextSegment.pos.x, nextSegment.pos.y);
-      let dir = p.constructor.Vector.sub(this.pos, nextSegment.pos);
-      p.push();
-      p.translate(this.pos.x, this.pos.y);
-      p.rotate(dir.heading());
-      p.strokeWeight(1);
+      this.p.stroke(0, 0, 90, 85);
+      this.p.strokeWeight(1.5);
+      this.p.line(this.pos.x, this.pos.y, nextSegment.pos.x, nextSegment.pos.y);
+      let dir = p5.Vector.sub(this.pos, nextSegment.pos);
+      this.p.push();
+      this.p.translate(this.pos.x, this.pos.y);
+      this.p.rotate(dir.heading());
+      this.p.strokeWeight(1);
       let sweepBack = this.ribLength * 0.4;
       let halfRib = this.ribLength * 0.7;
-      p.line(0, 0, -sweepBack, -halfRib);
-      p.line(0, 0, -sweepBack, halfRib);
-      p.pop();
+      this.p.line(0, 0, -sweepBack, -halfRib);
+      this.p.line(0, 0, -sweepBack, halfRib);
+      this.p.pop();
     }
   }
 
   class Leg {
-    constructor(parentSegment, side, reach) {
-      this.parent = parentSegment;
-      this.side = side;
-      this.footPos = this.parent.pos.copy();
-      this.targetPos = this.parent.pos.copy();
-      this.kneePos = this.parent.pos.copy();
-      this.reach = reach;
-      this.upperLegLen = this.reach * 0.6;
-      this.lowerLegLen = this.reach * 0.6;
-      this.isStepping = true;
+    constructor(p, parentSegment, side, reach) {
+        this.p = p;
+        this.parent = parentSegment;
+        this.side = side;
+        this.footPos = this.parent.pos.copy();
+        this.targetPos = this.parent.pos.copy();
+        this.kneePos = this.parent.pos.copy();
+        this.reach = reach;
+        this.upperLegLen = this.reach * 0.6;
+        this.lowerLegLen = this.reach * 0.6;
+        this.isStepping = true;
     }
     findNewTarget() {
-      let bodyDir = p.constructor.Vector.sub(
-        this.parent.pos,
-        this.parent.target
-      ).normalize();
-      let perpendicularDir = p.createVector(bodyDir.y, -bodyDir.x);
+      let bodyDir = p5.Vector.sub(this.parent.pos, this.parent.target).normalize();
+      let perpendicularDir = this.p.createVector(bodyDir.y, -bodyDir.x);
       let stepVector = bodyDir.mult(-this.reach * 0.75);
       stepVector.add(perpendicularDir.mult(this.side * this.reach * 0.5));
-      this.targetPos = p.constructor.Vector.add(this.parent.pos, stepVector);
+      this.targetPos = p5.Vector.add(this.parent.pos, stepVector);
       this.isStepping = true;
     }
     update() {
       if (this.isStepping) {
         this.footPos.lerp(this.targetPos, 0.1);
-        if (p.constructor.Vector.dist(this.footPos, this.targetPos) < 1) {
+        if (p5.Vector.dist(this.footPos, this.targetPos) < 1) {
           this.isStepping = false;
         }
       }
       let hip = this.parent.pos;
       let foot = this.footPos;
-      let d = p.constructor.Vector.dist(hip, foot);
-      d = p.min(d, this.upperLegLen + this.lowerLegLen - 1);
-      let a =
-        (d * d +
-          this.upperLegLen * this.upperLegLen -
-          this.lowerLegLen * this.lowerLegLen) /
-        (2 * d);
-      let h = p.sqrt(p.max(0, this.upperLegLen * this.upperLegLen - a * a));
-      let midPoint = p.constructor.Vector.lerp(hip, foot, a / d);
-      let hipToFoot = p.constructor.Vector.sub(foot, hip).normalize();
-      let kneeOffset = p.createVector(-hipToFoot.y, hipToFoot.x).mult(
-        h * this.side
-      );
-      this.kneePos = p.constructor.Vector.add(midPoint, kneeOffset);
+      let d = p5.Vector.dist(hip, foot);
+      d = this.p.min(d, this.upperLegLen + this.lowerLegLen - 1);
+      let a = (d * d + this.upperLegLen * this.upperLegLen - this.lowerLegLen * this.lowerLegLen) / (2 * d);
+      let h = this.p.sqrt(this.p.max(0, this.upperLegLen * this.upperLegLen - a * a));
+      let midPoint = p5.Vector.lerp(hip, foot, a / d);
+      let hipToFoot = p5.Vector.sub(foot, hip).normalize();
+      let kneeOffset = this.p.createVector(-hipToFoot.y, hipToFoot.x).mult(h * this.side);
+      this.kneePos = p5.Vector.add(midPoint, kneeOffset);
     }
     show() {
-      p.stroke(0, 0, 90, 70);
-      p.strokeWeight(1.5);
-      p.line(this.parent.pos.x, this.parent.pos.y, this.kneePos.x, this.kneePos.y);
-      p.line(this.kneePos.x, this.kneePos.y, this.footPos.x, this.footPos.y);
+      this.p.stroke(0, 0, 90, 70);
+      this.p.strokeWeight(1.5);
+      this.p.line(this.parent.pos.x, this.parent.pos.y, this.kneePos.x, this.kneePos.y);
+      this.p.line(this.kneePos.x, this.kneePos.y, this.footPos.x, this.footPos.y);
       this.drawHand();
     }
     drawHand() {
-      p.push();
-      p.translate(this.footPos.x, this.footPos.y);
-      let dir = p.constructor.Vector.sub(this.footPos, this.kneePos);
-      p.rotate(dir.heading());
-      p.stroke(0, 0, 90, 70);
-      p.strokeWeight(1);
-      p.line(0, 0, -4, -3);
-      p.line(0, 0, -4, 0);
-      p.line(0, 0, -4, 3);
-      p.pop();
+      this.p.push();
+      this.p.translate(this.footPos.x, this.footPos.y);
+      let dir = p5.Vector.sub(this.footPos, this.kneePos);
+      this.p.rotate(dir.heading());
+      this.p.stroke(0, 0, 90, 70);
+      this.p.strokeWeight(1);
+      this.p.line(0, 0, -4, -3);
+      this.p.line(0, 0, -4, 0);
+      this.p.line(0, 0, -4, 3);
+      this.p.pop();
     }
   }
 
   class Particle {
-    constructor(index) {
-      this.index = index;
-      this.state = "stable";
-      this.lifespan = 255;
-      let radius = p.min(p.width, p.height) / 4;
+    constructor(p, index) {
+        this.p = p;
+        this.index = index;
+        this.state = "stable";
+        this.lifespan = 255;
+        let radius = this.p.min(this.p.width, this.p.height) / 4;
 
       if (shapeStyle === 0) {
-        this.basePos = p.constructor.Vector.random3D().mult(radius);
+        this.basePos = p5.Vector.random3D().mult(radius);
       } else if (shapeStyle === 1) {
-        this.basePos = p.constructor.Vector.random3D().mult(radius + p.random(-30, 30));
+        this.basePos = p5.Vector.random3D().mult(radius + this.p.random(-30, 30));
       } else if (shapeStyle === 2) {
-        this.basePos = p.createVector(
-          p.random(-1, 1),
-          p.random(-1, 1),
-          p.random(-1, 1)
+        this.basePos = this.p.createVector(
+          this.p.random(-1, 1),
+          this.p.random(-1, 1),
+          this.p.random(-1, 1)
         ).mult(radius);
-        let component = p.floor(p.random(3));
-        let side = p.random() > 0.5 ? 1 : -1;
+        let component = this.p.floor(this.p.random(3));
+        let side = this.p.random() > 0.5 ? 1 : -1;
         if (component === 0) this.basePos.x = radius * side;
         else if (component === 1) this.basePos.y = radius * side;
         else this.basePos.z = radius * side;
       } else if (shapeStyle === 3) {
         let tubeRadius = radius * 0.4;
-        let mainAngle = p.random(p.TWO_PI);
-        let tubeAngle = p.random(p.TWO_PI);
-        this.basePos = p.createVector(
-          (radius + tubeRadius * p.cos(tubeAngle)) * p.cos(mainAngle),
-          (radius + tubeRadius * p.cos(tubeAngle)) * p.sin(mainAngle),
-          tubeRadius * p.sin(tubeAngle)
+        let mainAngle = this.p.random(this.p.TWO_PI);
+        let tubeAngle = this.p.random(this.p.TWO_PI);
+        this.basePos = this.p.createVector(
+          (radius + tubeRadius * this.p.cos(tubeAngle)) * this.p.cos(mainAngle),
+          (radius + tubeRadius * this.p.cos(tubeAngle)) * this.p.sin(mainAngle),
+          tubeRadius * this.p.sin(tubeAngle)
         );
       } else if (shapeStyle === 4) {
-        let v = p.constructor.Vector.random3D();
-        let spike = 1 + p.noise(v.x * 2, v.y * 2, v.z * 2) * 1.5;
-        this.basePos = v.mult(radius * spike);
+        let pVec = p5.Vector.random3D();
+        let spike = 1 + this.p.noise(pVec.x * 2, pVec.y * 2, pVec.z * 2) * 1.5;
+        this.basePos = pVec.mult(radius * spike);
       } else if (shapeStyle === 5) {
-        let angle = p.random(p.TWO_PI);
-        let h = p.random(-radius, radius);
+        let angle = this.p.random(this.p.TWO_PI);
+        let h = this.p.random(-radius, radius);
         let r = radius * 0.8;
-        this.basePos = p.createVector(r * p.cos(angle), h, r * p.sin(angle));
+        this.basePos = this.p.createVector(r * this.p.cos(angle), h, r * this.p.sin(angle));
       }
 
       this.pos = this.basePos.copy();
-      this.vel = p.createVector();
+      this.vel = this.p.createVector();
     }
 
     explode() {
       this.state = "exploding";
-      this.vel = this.pos.copy().normalize().mult(p.random(4, 9));
-      this.vel.add(p.constructor.Vector.random3D().mult(3));
+      this.vel = this.pos.copy().normalize().mult(this.p.random(4, 9));
+      this.vel.add(p5.Vector.random3D().mult(3));
     }
 
     isDead() {
@@ -477,12 +480,10 @@ const sketch2 = (p) => {
 
     update() {
       if (this.state === "stable") {
-        let x1 =
-          this.basePos.x * p.cos(rotationY) - this.basePos.z * p.sin(rotationY);
-        let z1 =
-          this.basePos.x * p.sin(rotationY) + this.basePos.z * p.cos(rotationY);
-        let y2 = this.basePos.y * p.cos(rotationX) - z1 * p.sin(rotationX);
-        let z2 = this.basePos.y * p.sin(rotationX) + z1 * p.cos(rotationX);
+        let x1 = this.basePos.x * this.p.cos(rotationY) - this.basePos.z * this.p.sin(rotationY);
+        let z1 = this.basePos.x * this.p.sin(rotationY) + this.basePos.z * this.p.cos(rotationY);
+        let y2 = this.basePos.y * this.p.cos(rotationX) - z1 * this.p.sin(rotationX);
+        let z2 = this.basePos.y * this.p.sin(rotationX) + z1 * this.p.cos(rotationX);
         this.pos.set(x1, y2, z2);
       } else if (this.state === "exploding") {
         this.pos.add(this.vel);
@@ -491,39 +492,39 @@ const sketch2 = (p) => {
     }
 
     getProjectedPoint() {
-      let fov = p.min(p.width, p.height) / 1.5;
+      let fov = this.p.min(this.p.width, this.p.height) / 1.5;
       let scale = fov / (fov + this.pos.z);
-      let x2d = this.pos.x * scale + p.width / 2;
-      let y2d = this.pos.y * scale + p.height / 2;
-      return p.createVector(x2d, y2d, scale);
+      let x2d = this.pos.x * scale + this.p.width / 2;
+      let y2d = this.pos.y * scale + this.p.height / 2;
+      return this.p.createVector(x2d, y2d, scale);
     }
 
     display() {
       if (this.isDead()) return;
       let screenPoint = this.getProjectedPoint();
-      let alpha = p.map(this.pos.z, -p.width / 2, p.width / 2, 40, 100);
+      let alpha = this.p.map(this.pos.z, -this.p.width / 2, this.p.width / 2, 40, 100);
       if (this.state === "exploding") {
         alpha = this.lifespan;
       }
 
       let c = currentParticleColor;
 
-      p.noStroke();
-      p.fill(p.hue(c), p.saturation(c), p.brightness(c), alpha);
+      this.p.noStroke();
+      this.p.fill(this.p.hue(c), this.p.saturation(c), this.p.brightness(c), alpha);
 
       let baseSize = 3;
       let size = baseSize * screenPoint.z;
       if (shapeStyle === 2 && this.state === "stable") {
-        p.rectMode(p.CENTER);
-        p.rect(screenPoint.x, screenPoint.y, size, size);
+        this.p.rectMode(this.p.CENTER);
+        this.p.rect(screenPoint.x, screenPoint.y, size, size);
       } else {
-        p.ellipse(screenPoint.x, screenPoint.y, size, size);
+        this.p.ellipse(screenPoint.x, screenPoint.y, size, size);
       }
       if (this.state === "exploding") {
-        p.stroke(p.hue(c), p.saturation(c), p.brightness(c), this.lifespan);
-        p.strokeWeight(1.5);
+        this.p.stroke(this.p.hue(c), this.p.saturation(c), this.p.brightness(c), this.lifespan);
+        this.p.strokeWeight(1.5);
         let trail = this.vel.copy().mult(-5);
-        p.line(
+        this.p.line(
           screenPoint.x,
           screenPoint.y,
           screenPoint.x + trail.x,
@@ -534,6 +535,8 @@ const sketch2 = (p) => {
   }
 };
 
+// Khởi tạo sketch p5 mới
+new p5(sketch);
 
 new p5(sketch2, 'sketch-centipede-container');
 
