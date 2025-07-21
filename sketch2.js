@@ -535,5 +535,5 @@ const sketch2 = (p) => {
 };
 
 
-new p5(centipedeSketch, 'p5-centipede-canvas');
+new p5(sketch2, 'sketch-centipede-container');
 
