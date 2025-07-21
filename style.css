@@ -1,6 +1,6 @@
 @font-face {
-  font-family: 'Amarillo'; /* Đặt một cái tên cho font của bạn */
-  src: url('fonts/AmarilloUSAF.ttf') format('truetype'); /* Đường dẫn tương đối đến file font */
+    font-family: "AmarilloUSAF";
+  src: url("fonts/AmarilloUSAF.ttf") format("truetype"); /* Đường dẫn tương đối đến file font */
   font-weight: normal;
   font-style: normal;
 }
