@@ -173,7 +173,7 @@ let sketch1 = (p) => {
     // NƠI ĐỂ THAY ĐỔI VỊ TRÍ CỦA PANEL
     // Chỉ cần sửa 2 con số trong dòng dưới đây để di chuyển panel.
     // (0, 0) là vị trí gốc.
-    drawInfoPanel(-20, -420);
+    drawInfoPanel(-90, -420);
     // =================================================================
   };
 
