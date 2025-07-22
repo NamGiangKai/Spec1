@@ -161,7 +161,7 @@ const butterflySketch = (p) => {
     p.fill('rgb(234,71,71)');
     p.text('Climate change.', xRight, p.height / 5);
 
-    p.fill('white');
+    p.fill('red');
     p.text('We must act urgently and decisively to protect our planet ', xRight, p.height / 1.15);
     p.text('before the damage becomes irreversible.', xRight, p.height / 1.11);
   }
