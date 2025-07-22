@@ -183,14 +183,23 @@ let sketch1 = (p) => {
       myRect(50 + x, 170 + y);
     }
 
-   myArt(1050, p.height - 660); // 1080 - 420
-myArt(1200, p.height - 660); // 1080 - 420
-myArt(1250, p.height - 650); // 1080 - 430
-myArt(1200, p.height - 710); // 1080 - 370
-myArt(1100, p.height - 700); // 1080 - 380
-myArt(1230, p.height - 730); // 1080 - 350
-myArt(1070, p.height - 620); // 1080 - 460
-myArt(1070, p.height - 580); // 1080 - 500
+ // Đặt ngoài p.draw() — thường ở đầu file hoặc ngay trước p.setup()
+const myArtPositions = [
+  { x: 1050, y: 660 },
+  { x: 1200, y: 660 },
+  { x: 1250, y: 650 },
+  { x: 1200, y: 710 },
+  { x: 1100, y: 700 },
+  { x: 1230, y: 730 },
+  { x: 1070, y: 620 },
+  { x: 1070, y: 580 },
+];
+
+// Trong p.draw(), tại vị trí bạn từng gọi các myArt(...) riêng lẻ
+myArtPositions.forEach(pos => {
+  myArt(pos.x, p.height - pos.y);
+});
+
 
     // --- Vẽ chữ ---
     let quote =
