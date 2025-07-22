@@ -169,13 +169,28 @@ let sketch1 = (p) => {
       }
     }
 
-    // --- FIX HERE: fill(255) rõ ràng và không cần truyền "255" chuỗi nữa ---
+    // =================================================================
+    // NƠI ĐỂ THAY ĐỔI VỊ TRÍ CỦA PANEL
+    // Chỉ cần sửa 2 con số trong dòng dưới đây để di chuyển panel.
+    // (0, 0) là vị trí gốc.
+    drawInfoPanel(-20, -420);
+    // =================================================================
+  };
+
+  /**
+   * Hàm này vẽ toàn bộ panel thông tin tại một vị trí gốc.
+   * @param {number} offsetX - Độ dời theo trục X (ngang).
+   * @param {number} offsetY - Độ dời theo trục Y (dọc).
+   */
+  function drawInfoPanel(offsetX, offsetY) {
+    // Hàm cục bộ để vẽ hình chữ nhật
     function myRect(x, y) {
       p.noStroke();
       p.fill(255);
       p.rect(x, y, 60, 60);
     }
 
+    // Hàm cục bộ để vẽ một nhóm các hình chữ nhật
     function myArt(x, y) {
       myRect(100 + x, 150 + y);
       myRect(150 + x, 160 + y);
@@ -183,48 +198,40 @@ let sketch1 = (p) => {
       myRect(50 + x, 170 + y);
     }
 
- // Đặt ngoài p.draw() — thường ở đầu file hoặc ngay trước p.setup()
-const myArtPositions = [
-  { x: 1050, y: 660 },
-  { x: 1200, y: 660 },
-  { x: 1250, y: 650 },
-  { x: 1200, y: 710 },
-  { x: 1100, y: 700 },
-  { x: 1230, y: 730 },
-  { x: 1070, y: 620 },
-  { x: 1070, y: 580 },
-];
+    // Vẽ các khối hình, có cộng thêm offsetX và offsetY
+    myArt(offsetX + 1050, offsetY + 420);
+    myArt(offsetX + 1200, offsetY + 420);
+    myArt(offsetX + 1250, offsetY + 430);
+    myArt(offsetX + 1200, offsetY + 370);
+    myArt(offsetX + 1100, offsetY + 380);
+    myArt(offsetX + 1230, offsetY + 350);
+    myArt(offsetX + 1070, offsetY + 460);
+    myArt(offsetX + 1070, offsetY + 500);
 
-// Trong p.draw(), tại vị trí bạn từng gọi các myArt(...) riêng lẻ
-myArtPositions.forEach(pos => {
-  myArt(pos.x, p.height - pos.y);
-});
-
-
-    // --- Vẽ chữ ---
+    // Vẽ phần văn bản, có cộng thêm offsetX và offsetY
     let quote =
       '"We are facing a man-made disaster on a global scale. Our greatest threat in thousands of years. Climate change."';
-    let x = 1270;
-    let y = p.height - 530;
     let maxWidth = 290;
+    
     p.textSize(12);
     p.textStyle(p.BOLD);
     p.textFont("Source Code Pro");
     p.fill('black');
     p.textAlign(p.LEFT);
-    p.text(quote, x, y, maxWidth);
+    p.text(quote, offsetX + 1270, offsetY + 550, maxWidth);
 
     p.textSize(10);
     p.textStyle(p.ITALIC);
-    p.text("— Sir David Attenborough", 1320, p.height - 470, maxWidth);
+    p.text("— Sir David Attenborough", offsetX + 1320, offsetY + 610, maxWidth);
 
     p.textSize(11);
     p.textStyle(p.NORMAL);
     p.fill(255);
     p.text(
-      "We must act urgently and decisively to protect our planet before the damage becomes irreversible.", 1390, p.height - 435,200
+      "We must act urgently and decisively to protect our planet before the damage becomes irreversible.",
+      offsetX + 1390, offsetY + 645, 200
     );
-  };
+  }
 };
 
 new p5(sketch1, 'p5-canvas-container');
