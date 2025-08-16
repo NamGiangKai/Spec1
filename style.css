@@ -7,7 +7,6 @@
 }
 
 
-
 /* --- FONT & GENERAL SETUP --- */
 body {
     background-color: #000;
@@ -43,14 +42,13 @@ body {
 
 /* Main Title - DEKAY */
 .main-title {
-    font-family: 'AmarilloUSAF', sans-serif;
-    font-size: 19rem;
+    font-family: "acumin-pro-wide", sans-serif;
+    font-size: 20rem;
     font-weight: 900;
     color: #fff;
     text-align: center;
-    margin: 2rem 0 4rem 0;
+    margin: 2rem 0 -3rem 0;
     letter-spacing: 0.5rem;
-    text-transform: uppercase;
 }
 
 /* Student Information Container */
@@ -60,8 +58,8 @@ body {
     gap: 2rem;
     margin-bottom: 4rem;
     max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 1.8rem;
+    margin-right: -10rem;
 }
 
 .student-column {
@@ -86,17 +84,31 @@ body {
     opacity: 0.8;
 }
 
+#student3 {
+    padding-left: 6rem;
+}
+#studentid3 {
+    padding-left: 6rem;
+}
+#student2 {
+    padding-left: 4rem;
+}
+#studentid2 {
+    padding-left: 4rem;
+}
+
 /* Quote Container */
 .quote-container {
     text-align: left;
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
+    width: 1500px;
 }
 
 .quote-text {
     font-family: 'Source Code Pro', monospace;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 400;
     color: #fff;
     line-height: 1.4;
@@ -111,6 +123,7 @@ body {
     color: #fff;
     text-align: right;
     opacity: 0.9;
+    margin-right: 2.5rem;
 }
 
 /* Footer Container */
@@ -389,9 +402,6 @@ body {
     font-size: 100px;
 }
 
-.quote-container {
-    width: 1000px;
-}
 
 .quote-container .quote {
     font-family: 'AmarilloUSAF', sans-serif;
