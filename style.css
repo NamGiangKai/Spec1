@@ -131,34 +131,42 @@ body {
 /* Footer Container */
 .footer-container {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     margin-top: 4rem;
     padding: 2rem 0;
+    width: 100%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .footer-left,
-.footer-center,
+.footer-center {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #fff;
+    opacity: 0.8;
+    text-align: left;
+}
+
+.footer-left {
+    margin-right: 9rem;
+}
+
+.footer-center {
+    margin-right: 2rem;
+}
+
 .footer-right {
     font-family: 'Source Code Pro', monospace;
     font-size: 1rem;
     font-weight: 500;
     color: #fff;
     opacity: 0.8;
-}
-
-.footer-left {
-    text-align: left;
-    padding-left: 9rem;
-}
-
-.footer-center {
-    padding-left: 9rem;
-}
-
-.footer-right {
     text-align: right;
-    align-self: end;
-    width: 45rem;
+    margin-left: auto;
 }
 
 /* --- PHẦN 1: DEKAY --- */
