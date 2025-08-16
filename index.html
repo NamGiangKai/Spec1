@@ -1,182 +1,226 @@
 <!DOCTYPE html>
 <html lang="vi">
-
-<head>
+  <head>
     <!-- Tải thư viện p5.js từ CDN (chỉ cần 1 lần) -->
     <script src="https://cdn.jsdelivr.net/npm/p5@1.11.8/lib/p5.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.11.8/lib/addons/p5.sound.min.js"></script>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DEKAY - Climate Change</title>
 
     <!-- Tải CSS và Fonts -->
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
-    <link href="https://db.onlinewebfonts.com/c/040a782d6538dc859645532c525f9b4c?family=VCR+OSD+Mono" rel="stylesheet">
-    <link rel="stylesheet" href="fonts\AmarilloUSAF.ttf">
-</head>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://db.onlinewebfonts.com/c/040a782d6538dc859645532c525f9b4c?family=VCR+OSD+Mono"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="fonts\AmarilloUSAF.ttf" />
+  </head>
 
-<body>
-
+  <body>
     <header class="site-header">
-        <p>RMIT University Vietnam, Saigon South Campus, School of Communication and Design, Digital Media Program</p>
+      <p>
+        RMIT University Vietnam, Saigon South Campus, School of Communication
+        and Design, Digital Media Program
+      </p>
     </header>
 
     <main class="main-content">
-        <div class="top-section">
-            <div class="quote-container">
-                <p class="quote">WE ARE FACING A MAN-MADE DISASTER ON A GLOBAL SCALE. </br>OUR GREATEST THREAT IN
-                    THOUSANDS
-                    OF YEARS. CLIMATE CHANGE.</p>
-                <p class="attribution">-SIR DAVID ATTENBOROUGH</p>
-            </div>
-            <div class="separator"></div>
-            <div class="logo-container">
-                <h1 class="logo">
-                    <span class="char-large">D</span><span class="char-small">E</span>
-                    <span class="char-large">K</span><span class="char-small">AY</span>
-                </h1>
-            </div>
-        </div>
-        <div class="site-footer">
-            <div class="footer-left">
-                <span>COMM2754</span>
-                <span>Digital Media Specialisation 1</span>
-            </div>
-            <div class="footer-right">
-                <div class="student-list">
-                    <div class="student-info">
-                        <span>Bui Ngoc Kieu Anh</span>
-                        <span>s3929315</span>
-                    </div>
-                    <div class="student-info">
-                        <span>Vuong Man Nghi</span>
-                        <span>s3977938</span>
-                    </div>
-                    <div class="student-info">
-                        <span>Huynh Tran Nam Giang</span>
-                        <span>s3907650</span>
-                    </div>
-                </div>
-                <div class="semester-info">
-                    <span>Semester B/2025</span>
-                </div>
-            </div>
-        </div>
+      <!-- Main Title - DEKAY -->
+      <h1 class="main-title">DEKAY</h1>
 
-
-        <div class="new-section">
-            <div class="section-number" data-goal="13">
-                <div class="separator-line"></div>
-                <div class="digit-container"><span class="digit" id="digit1">0</span></div>
-                <div class="digit-container"><span class="digit" id="digit2">0</span></div>
-            </div>
-            <h3 class="section-title">TAKE URGENT ACTION TO COMBAT CLIMATE CHANGE AND ITS IMPACTS</h3>
-            <p class="section-paragraph">Sir David Attenborough’s statement that “We are facing a man-made disaster on a global scale. Our greatest threat in thousands of years. Climate change.” reflects the urgency captured in Sustainable Development Goal 13: Climate Action. SDG 13 calls for rapid reductions in emissions, stronger climate resilience, and the integration of climate policy across all levels of planning. Attenborough’s quote emphasizes that climate change is not a distant or natural crisis, but one driven by human activity particularly industrial pollution and unsustainable practices. This alignment between the SDG and the quote underscores a shared message: climate change is happening now, and it is our responsibility to stop it.</p>
-            <p class="section-call-to-action">WE MUST ACT URGENTLY AND DECISIVELY TO PROTECT OUR PLANET BEFORE THE
-                DAMAGE BECOMES IRREVERSIBLE.</p>
+      <!-- Student Information - 3 columns -->
+      <div class="student-info-container">
+        <div class="student-column">
+          <div class="student-name">Bui Ngoc Kieu Anh</div>
+          <div class="student-id">s3929315</div>
         </div>
+        <div class="student-column">
+          <div class="student-name">Huynh Tran Nam Giang</div>
+          <div class="student-id">s3907650</div>
+        </div>
+        <div class="student-column">
+          <div class="student-name">Vuong Man Nghi</div>
+          <div class="student-id">s3977938</div>
+        </div>
+      </div>
+
+      <!-- Quote Section -->
+      <div class="quote-container">
+        <div class="quote-text">
+          WE ARE FACING A MAN-MADE DISASTER ON A GLOBAL SCALE. OUR GREATEST
+          THREAT IN THOUSANDS OF YEARS. CLIMATE CHANGE.
+        </div>
+        <div class="quote-attribution">-Sir David Attenborough</div>
+      </div>
+
+      <!-- Footer Information -->
+      <div class="footer-container">
+        <div class="footer-left">COMM2754</div>
+        <div class="footer-center">Digital Media Specialisation 1</div>
+        <div class="footer-right">Semester B/ 2025</div>
+      </div>
+
+      <div class="new-section">
+        <div class="section-number" data-goal="13">
+          <div class="separator-line"></div>
+          <div class="digit-container">
+            <span class="digit" id="digit1">0</span>
+          </div>
+          <div class="digit-container">
+            <span class="digit" id="digit2">0</span>
+          </div>
+        </div>
+        <h3 class="section-title">
+          TAKE URGENT ACTION TO COMBAT CLIMATE CHANGE AND ITS IMPACTS
+        </h3>
+        <p class="section-paragraph">
+          Sir David Attenborough’s statement that “We are facing a man-made
+          disaster on a global scale. Our greatest threat in thousands of years.
+          Climate change.” reflects the urgency captured in Sustainable
+          Development Goal 13: Climate Action. SDG 13 calls for rapid reductions
+          in emissions, stronger climate resilience, and the integration of
+          climate policy across all levels of planning. Attenborough’s quote
+          emphasizes that climate change is not a distant or natural crisis, but
+          one driven by human activity particularly industrial pollution and
+          unsustainable practices. This alignment between the SDG and the quote
+          underscores a shared message: climate change is happening now, and it
+          is our responsibility to stop it.
+        </p>
+        <p class="section-call-to-action">
+          WE MUST ACT URGENTLY AND DECISIVELY TO PROTECT OUR PLANET BEFORE THE
+          DAMAGE BECOMES IRREVERSIBLE.
+        </p>
+      </div>
     </main>
 
     <!-- Container cho Sketch 1 -->
     <div id="sketch-mold-container" class="sketch-container">
-        <div class="artwork-container">
-            <div id="p5-canvas-container"></div>
-            <div class="artwork-overlay">
-                <p class="artwork-description">
-                    “The Spread” is an interactive generative artwork that visualizes how pollution infiltrates our
-                    environment. Using drifting smoke and slime mold like patterns, it reflects the slow and invasive
-                    spread of industrial emissions, resembling blood vessels within the Earth. Red scanning frames
-                    detect toxic agents, symbolizing climate instability and nature’s response. The work encourages
-                    viewers to reflect on the invisible forces shaping our world and inspires action, even the smallest,
-                    against climate change.
-                </p>
-                <div class="artwork-title">
-                    <span class="title-line-1">ACT I: THE</span>
-                    <span class="title-line-2">SPREAD</span>
-                </div>
-            </div>
+      <div class="artwork-container">
+        <div id="p5-canvas-container"></div>
+        <div class="artwork-overlay">
+          <p class="artwork-description">
+            “The Spread” is an interactive generative artwork that visualizes
+            how pollution infiltrates our environment. Using drifting smoke and
+            slime mold like patterns, it reflects the slow and invasive spread
+            of industrial emissions, resembling blood vessels within the Earth.
+            Red scanning frames detect toxic agents, symbolizing climate
+            instability and nature’s response. The work encourages viewers to
+            reflect on the invisible forces shaping our world and inspires
+            action, even the smallest, against climate change.
+          </p>
+          <div class="artwork-title">
+            <span class="title-line-1">ACT I: THE</span>
+            <span class="title-line-2">SPREAD</span>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Container cho Sketch 2 -->
     <div id="sketch-centipede-container" class="sketch-container">
-        <div class="artwork-container">
-            <div id="p5-centipede-canvas"></div>
-            <div class="artwork-overlay">
-                <p class="artwork-description">
-                    “The Starved” with he skeletal centipede represents humanity, relentlessly crawling over a fragile
-                    world in its mechanical pursuit of profit. Each click is an act of exploitation that shatters the
-                    pristine environment, causing the background to bleed red and corrupting the white particles of life
-                    into black decay. Though the world regenerates, humanity's destructive cycle of greed is endless,
-                    always ready to exploit it anew.
-                </p>
-                <div class="artwork-title">
-                    <span class="title-line-1">act II: THE</span>
-                    <span class="title-line-2">STARVED</span>
-                </div>
-            </div>
+      <div class="artwork-container">
+        <div id="p5-centipede-canvas"></div>
+        <div class="artwork-overlay">
+          <p class="artwork-description">
+            “The Starved” with he skeletal centipede represents humanity,
+            relentlessly crawling over a fragile world in its mechanical pursuit
+            of profit. Each click is an act of exploitation that shatters the
+            pristine environment, causing the background to bleed red and
+            corrupting the white particles of life into black decay. Though the
+            world regenerates, humanity's destructive cycle of greed is endless,
+            always ready to exploit it anew.
+          </p>
+          <div class="artwork-title">
+            <span class="title-line-1">act II: THE</span>
+            <span class="title-line-2">STARVED</span>
+          </div>
         </div>
+      </div>
     </div>
 
     <div id="sketch-dekay-container" class="sketch-container">
-        <div class="artwork-container">
-            <div id="p5-dekay-canvas"></div>
-            <div class="artwork-overlay">
-                <p class="artwork-description">
-                    “The Dekay” illustrating a sparkling butterfly slowly decaying, "The Dekay" borrows an image of an insect- representation of nature- portraying the collapse of biodiversity by the increasing threat of rising temperatures, habitat loss, and pollution. Instead of warning, this work provides a fictional vision (metaphorized by the eye-shaped cursor) of a slowly dying planet, where there no longer signs of living habitats; in order to emphasize the importance of taking action and saving Home.
-                </p>
-                <div class="artwork-title">
-                    <span class="title-line-1">act III: THE</span>
-                    <span class="title-line-2">DEKAY</span>
-                </div>
-            </div>
+      <div class="artwork-container">
+        <div id="p5-dekay-canvas"></div>
+        <div class="artwork-overlay">
+          <p class="artwork-description">
+            “The Dekay” illustrating a sparkling butterfly slowly decaying, "The
+            Dekay" borrows an image of an insect- representation of nature-
+            portraying the collapse of biodiversity by the increasing threat of
+            rising temperatures, habitat loss, and pollution. Instead of
+            warning, this work provides a fictional vision (metaphorized by the
+            eye-shaped cursor) of a slowly dying planet, where there no longer
+            signs of living habitats; in order to emphasize the importance of
+            taking action and saving Home.
+          </p>
+          <div class="artwork-title">
+            <span class="title-line-1">act III: THE</span>
+            <span class="title-line-2">DEKAY</span>
+          </div>
         </div>
+      </div>
     </div>
-
-
-
 
     <!-- Script cho hiệu ứng số đếm -->
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const numberContainer = document.querySelector('.section-number');
-            const digit1 = document.getElementById('digit1');
-            const digit2 = document.getElementById('digit2');
-            const numbersUp = '98765432109876543210';
-            const numbersDown = '01234567890123456789';
-            digit1.innerHTML = numbersUp.split('').map(n => `<div>${n}</div>`).join('');
-            digit2.innerHTML = numbersDown.split('').map(n => `<div>${n}</div>`).join('');
-            const startCounter = () => {
-                const goal = numberContainer.dataset.goal;
-                const goal1 = parseInt(goal[0]);
-                const goal2 = parseInt(goal[1]);
-                digit1.parentElement.classList.add('running');
-                digit2.parentElement.classList.add('running');
-                setTimeout(() => {
-                    digit1.parentElement.classList.remove('running');
-                    digit2.parentElement.classList.remove('running');
-                    const digitHeight = digit1.querySelector('div').clientHeight;
-                    const finalPos1 = -(numbersUp.lastIndexOf(goal1.toString()) * digitHeight);
-                    const finalPos2 = -(numbersDown.indexOf(goal2.toString(), 1) * digitHeight);
-                    digit1.style.transform = `translateY(${finalPos1}px)`;
-                    digit2.style.transform = `translateY(${finalPos2}px)`;
-                }, 2000);
-            };
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        startCounter();
-                        observer.unobserve(numberContainer);
-                    }
-                });
-            }, { threshold: 0.5 });
-            observer.observe(numberContainer);
-        });
+      document.addEventListener("DOMContentLoaded", () => {
+        const numberContainer = document.querySelector(".section-number");
+        const digit1 = document.getElementById("digit1");
+        const digit2 = document.getElementById("digit2");
+        const numbersUp = "98765432109876543210";
+        const numbersDown = "01234567890123456789";
+        digit1.innerHTML = numbersUp
+          .split("")
+          .map((n) => `<div>${n}</div>`)
+          .join("");
+        digit2.innerHTML = numbersDown
+          .split("")
+          .map((n) => `<div>${n}</div>`)
+          .join("");
+        const startCounter = () => {
+          const goal = numberContainer.dataset.goal;
+          const goal1 = parseInt(goal[0]);
+          const goal2 = parseInt(goal[1]);
+          digit1.parentElement.classList.add("running");
+          digit2.parentElement.classList.add("running");
+          setTimeout(() => {
+            digit1.parentElement.classList.remove("running");
+            digit2.parentElement.classList.remove("running");
+            const digitHeight = digit1.querySelector("div").clientHeight;
+            const finalPos1 = -(
+              numbersUp.lastIndexOf(goal1.toString()) * digitHeight
+            );
+            const finalPos2 = -(
+              numbersDown.indexOf(goal2.toString(), 1) * digitHeight
+            );
+            digit1.style.transform = `translateY(${finalPos1}px)`;
+            digit2.style.transform = `translateY(${finalPos2}px)`;
+          }, 2000);
+        };
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                startCounter();
+                observer.unobserve(numberContainer);
+              }
+            });
+          },
+          { threshold: 0.5 }
+        );
+        observer.observe(numberContainer);
+      });
     </script>
 
     <!-- Tải các file sketch -->
@@ -184,15 +228,9 @@
     <script src="sketch2.js"></script>
     <script src="sketch3.js"></script>
 
-
     <!-- Khởi tạo các sketch p5.js -->
     <script>
-        // SỬA LỖI: Dùng đúng tên hàm 'sketch1' và 'sketch2'
-      
-        
-      
+      // SỬA LỖI: Dùng đúng tên hàm 'sketch1' và 'sketch2'
     </script>
-
-</body>
-
+  </body>
 </html>

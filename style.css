@@ -1,10 +1,11 @@
 @font-face {
     font-family: "AmarilloUSAF";
-  src: url("fonts/AmarilloUSAF.ttf") format("truetype"); /* Đường dẫn tương đối đến file font */
-  font-weight: normal;
-  font-style: normal;
+    src: url("fonts/AmarilloUSAF.ttf") format("truetype");
+    /* Đường dẫn tương đối đến file font */
+    font-weight: normal;
+    font-style: normal;
 }
-   
+
 
 
 /* --- FONT & GENERAL SETUP --- */
@@ -22,8 +23,8 @@ body {
 
 /* --- HEADER --- */
 .site-header {
-    text-align: center;
-    font-size: 0.8rem;
+    text-align: right;
+    font-size: 0.7rem;
     letter-spacing: 1px;
     text-transform: uppercase;
     opacity: 0.9;
@@ -37,6 +38,111 @@ body {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
+    text-align: center;
+}
+
+/* Main Title - DEKAY */
+.main-title {
+    font-family: 'AmarilloUSAF', sans-serif;
+    font-size: 19rem;
+    font-weight: 900;
+    color: #fff;
+    text-align: center;
+    margin: 2rem 0 4rem 0;
+    letter-spacing: 0.5rem;
+    text-transform: uppercase;
+}
+
+/* Student Information Container */
+.student-info-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 4rem;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.student-column {
+    text-align: left;
+    min-width: 180px;
+}
+
+.student-name {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+}
+
+.student-id {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: #fff;
+    opacity: 0.8;
+}
+
+/* Quote Container */
+.quote-container {
+    text-align: left;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.quote-text {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #fff;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.quote-attribution {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: #fff;
+    text-align: right;
+    opacity: 0.9;
+}
+
+/* Footer Container */
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4rem;
+    padding: 2rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer-left,
+.footer-center,
+.footer-right {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #fff;
+    opacity: 0.8;
+}
+
+.footer-left {
+    text-align: left;
+}
+
+.footer-center {
+    text-align: center;
+}
+
+.footer-right {
+    text-align: right;
 }
 
 /* --- PHẦN 1: DEKAY --- */
@@ -82,7 +188,7 @@ body {
     font-family: 'AmarilloUSAF', sans-serif;
     font-size: 9rem;
     margin-right: 10px;
-    text-shadow: 0 0 8px rgba(255, 0, 0, .5); 
+    text-shadow: 0 0 8px rgba(255, 0, 0, .5);
     font-weight: 400;
 }
 
@@ -91,7 +197,7 @@ body {
     font-size: 5rem;
     margin-right: 10px;
     text-shadow: 0 0 5px rgba(255, 255, 255, .3);
-    font-weight: 400; 
+    font-weight: 400;
 }
 
 .new-section {
@@ -105,9 +211,10 @@ body {
     height: 340px;
     background-color: black;
     position: absolute;
-    transform: rotate(40deg); 
+    transform: rotate(40deg);
     z-index: 9999;
 }
+
 .section-number {
     font-family: 'AmarilloUSAF', sans-serif;
     font-size: 15rem;
@@ -301,6 +408,7 @@ body {
     from {
         transform: translateY(0);
     }
+
     to {
         transform: translateY(-50%);
     }
@@ -310,6 +418,7 @@ body {
     from {
         transform: translateY(-50%);
     }
+
     to {
         transform: translateY(0);
     }
@@ -327,6 +436,19 @@ body {
 
 /* --- RESPONSIVE DESIGN --- */
 @media (max-width: 1024px) {
+    .main-title {
+        font-size: 6rem;
+        letter-spacing: 0.3rem;
+    }
+
+    .student-info-container {
+        gap: 3rem;
+    }
+
+    .quote-text {
+        font-size: 1.3rem;
+    }
+
     .top-section {
         flex-direction: column;
         text-align: center;
@@ -367,6 +489,41 @@ body {
 }
 
 @media (max-width: 768px) {
+    .main-title {
+        font-size: 4rem;
+        letter-spacing: 0.2rem;
+        margin: 1rem 0 2rem 0;
+    }
+
+    .student-info-container {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .student-column {
+        min-width: auto;
+    }
+
+    .quote-container {
+        margin: 2rem 0;
+        padding: 0 1rem;
+    }
+
+    .quote-text {
+        font-size: 1.1rem;
+    }
+
+    .footer-container {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .footer-left,
+    .footer-right {
+        text-align: center;
+    }
+
     body {
         padding: 1.5rem;
     }
@@ -438,5 +595,24 @@ body {
 
     .student-info {
         width: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-title {
+        font-size: 3rem;
+        letter-spacing: 0.1rem;
+    }
+
+    .quote-text {
+        font-size: 1rem;
+    }
+
+    .student-name {
+        font-size: 1rem;
+    }
+
+    .student-id {
+        font-size: 0.9rem;
     }
 }
