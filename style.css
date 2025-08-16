@@ -23,7 +23,7 @@ body {
 /* --- HEADER --- */
 .site-header {
     text-align: right;
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     letter-spacing: 1px;
     text-transform: uppercase;
     opacity: 0.9;
@@ -35,7 +35,6 @@ body {
 .main-content {
     flex-grow: 1;
     width: 100%;
-    max-width: 1200px;
     margin: 0 auto;
     text-align: center;
 }
@@ -54,12 +53,14 @@ body {
 /* Student Information Container */
 .student-info-container {
     display: flex;
-    justify-content: space-between;
-    gap: 2rem;
+    flex-direction: row;
+    gap: 4rem;
+    justify-content: space-around;
     margin-bottom: 4rem;
     max-width: 100%;
-    margin-left: 1.8rem;
-    margin-right: -10rem;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1500px;
 }
 
 .student-column {
@@ -69,7 +70,7 @@ body {
 
 .student-name {
     font-family: 'Source Code Pro', monospace;
-    font-size: 0.9rem;
+    font-size: 0.7rem;
     font-weight: 500;
     color: #fff;
     margin-bottom: 0.3rem;
@@ -78,7 +79,7 @@ body {
 
 .student-id {
     font-family: 'Source Code Pro', monospace;
-    font-size: 0.8rem;
+    font-size: 0.6rem;
     font-weight: 400;
     color: #fff;
     opacity: 0.8;
@@ -87,19 +88,22 @@ body {
 #student3 {
     padding-left: 6rem;
 }
+
 #studentid3 {
     padding-left: 6rem;
 }
+
 #student2 {
     padding-left: 4rem;
 }
+
 #studentid2 {
     padding-left: 4rem;
 }
 
 /* Quote Container */
 .quote-container {
-    text-align: left;
+    text-align: center;
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
@@ -123,17 +127,15 @@ body {
     color: #fff;
     text-align: right;
     opacity: 0.9;
-    margin-right: 2.5rem;
+    margin-right: 8rem;
 }
 
 /* Footer Container */
 .footer-container {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     margin-top: 4rem;
     padding: 2rem 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .footer-left,
@@ -151,11 +153,13 @@ body {
 }
 
 .footer-center {
-    text-align: center;
+    padding-left: 9rem;
 }
 
 .footer-right {
     text-align: right;
+    align-self: end;
+    width: 57rem;
 }
 
 /* --- PHẦN 1: DEKAY --- */
@@ -263,30 +267,46 @@ body {
 }
 
 .section-title {
-    font-size: 1.8rem;
-    font-weight: bold;
-    letter-spacing: 2x;
+    font-size: 29px;
+    font-family: "Acumin Pro Wide", sans-serif;
+    font-weight: 400;
+    letter-spacing: 2px;
+    word-spacing: 10px;
     margin-bottom: 2.5rem;
-    text-align: center;
+    text-align: left;
     width: 100%;
+    max-width: 1742px;
+    color: white;
+    word-wrap: break-word;
 }
 
 .section-paragraph {
     font-family: "Source Code Pro", monospace;
-    font-size: 1rem;
-    line-height: 1.8;
+    font-size: 18px;
+    font-weight: 400;
     opacity: .9;
     margin-bottom: 3rem;
     text-align: left;
+    width: 100%;
+    max-width: 1742px;
+    color: white;
+    word-wrap: break-word;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .section-call-to-action {
-    font-weight: 700;
-    font-size: 1.1rem;
+    font-family: "Acumin Pro Wide", sans-serif;
+    font-weight: 400;
+    font-size: 24px;
     letter-spacing: 2px;
-    color: #fff;
+    color: white;
     opacity: 0.8;
     text-transform: uppercase;
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    word-wrap: break-word;
 }
 
 .site-footer {
