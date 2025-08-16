@@ -16,7 +16,7 @@ const sketch1 = (p) => {
 
     p.setup = () => {
         let canvasContainer = p.select('#p5-canvas-container');
-        let canvas = p.createCanvas(canvasContainer.width, canvasContainer.height);
+        let canvas = p.createCanvas(canvasContainer.width, 1080);
         canvas.parent('p5-canvas-container');
 
         // Giữ lại các cơ chế tải an toàn và gỡ lỗi của bạn
@@ -39,9 +39,12 @@ const sketch1 = (p) => {
             contourColor = p.color(0);
         }
 
-        cols = p.width / size + 1;
-        rows = p.height / size + 1;
+        // FIX: Sử dụng Math.ceil để đảm bảo đủ ô lưới
+        cols = Math.ceil(p.width / size) + 1;
+        rows = Math.ceil(p.height / size) + 1;
 
+        // Khởi tạo grid
+        grid = [];
         for (let i = 0; i < cols; i++) {
             grid[i] = [];
             for (let j = 0; j < rows; j++) {
@@ -50,6 +53,7 @@ const sketch1 = (p) => {
         }
 
         num = p.int(p.random(50, 60));
+        circles = [];
         for (let i = 0; i < num; i++) {
             circles.push(new Circle());
         }
@@ -58,14 +62,30 @@ const sketch1 = (p) => {
     p.windowResized = () => {
         let canvasContainer = p.select('#p5-canvas-container');
         p.resizeCanvas(canvasContainer.width, canvasContainer.height);
-        cols = p.width / size + 1;
-        rows = p.height / size + 1;
+        
+        // FIX: Cập nhật lại grid với kích thước mới
+        cols = Math.ceil(p.width / size) + 1;
+        rows = Math.ceil(p.height / size) + 1;
+        
+        // Tạo lại grid với kích thước mới
+        grid = [];
+        for (let i = 0; i < cols; i++) {
+            grid[i] = [];
+            for (let j = 0; j < rows; j++) {
+                grid[i][j] = 0;
+            }
+        }
+        
+        // Reset các blob
+        for (let i = 0; i < circles.length; i++) {
+            circles[i].reset();
+        }
     };
 
     p.draw = function () {
         p.background(bgColor.levels[0], 20);
 
-        // (Phần code tính toán và vẽ Marching Squares được giữ nguyên)
+        // Tính toán giá trị grid từ các blob
         for (let i = 0; i < cols; i++) {
             for (let j = 0; j < rows; j++) {
                 let val = 0;
@@ -77,9 +97,13 @@ const sketch1 = (p) => {
                 grid[i][j] = val;
             }
         }
+        
+        // Di chuyển các blob
         for (let c of circles) {
             c.move();
         }
+        
+        // Tính toán contour với Marching Squares
         pixelPixels = [];
         let pixelDens = 8;
         for (let i = 0; i < cols - 1; i++) {
@@ -114,6 +138,8 @@ const sketch1 = (p) => {
                 }
             }
         }
+        
+        // Vẽ hiệu ứng hạt đỏ dọc theo contour
         p.noStroke();
         p.fill("#EB0000");
         let runLength = 500;
@@ -134,6 +160,8 @@ const sketch1 = (p) => {
                 }
             }
         }
+        
+        // Vẽ contour chính
         p.stroke(contourColor);
         p.strokeWeight(1.5);
         p.noFill();
@@ -156,6 +184,15 @@ const sketch1 = (p) => {
                     case 3: p.line(pt2.x, pt2.y, pt4.x, pt4.y); break;
                     case 4: p.line(pt1.x, pt1.y, pt2.x, pt2.y); break;
                     case 5: p.line(pt1.x, pt1.y, pt4.x, pt4.y); p.line(pt2.x, pt2.y, pt3.x, pt3.y); break;
+                    case 6: p.line(pt1.x, pt1.y, pt3.x, pt3.y); break;
+                    case 7: p.line(pt1.x, pt1.y, pt4.x, pt4.y); break;
+                    case 8: p.line(pt1.x, pt1.y, pt4.x, pt4.y); break;
+                    case 9: p.line(pt1.x, pt1.y, pt3.x, pt3.y); break;
+                    case 10: p.line(pt1.x, pt1.y, pt2.x, pt2.y); p.line(pt3.x, pt3.y, pt4.x, pt4.y); break;
+                    case 11: p.line(pt1.x, pt1.y, pt2.x, pt2.y); break;
+                    case 12: p.line(pt2.x, pt2.y, pt4.x, pt4.y); break;
+                    case 13: p.line(pt2.x, pt2.y, pt3.x, pt3.y); break;
+                    case 14: p.line(pt3.x, pt3.y, pt4.x, pt4.y); break;
                 }
             }
         }
@@ -169,19 +206,9 @@ const sketch1 = (p) => {
             }
         }
 
-        // Giữ lại phần visual feedback của bạn để tiện gỡ lỗi
-        p.fill(255);
-        p.textSize(12);
-        p.textAlign(p.LEFT);
-        p.text(`Sound Loaded: ${sound && sound.isLoaded()}`, 50, 120);
-        p.text(`Muted: ${isMuted}`, 50, 140);
-        p.text(`Sound Started: ${soundHasStarted}`, 50, 160);
-        p.text(`Press P to play/stop, M to toggle mute`, 50, 180);
-        
         drawQuote();
     };
     
-    // Logic xử lý nhấn chuột đã được cập nhật
     p.mousePressed = function() {
         // Lần nhấn chuột đầu tiên (bất cứ đâu) để BẮT ĐẦU âm thanh
         if (!soundHasStarted) {
@@ -208,7 +235,6 @@ const sketch1 = (p) => {
         }
     };
     
-    // Giữ lại hàm keyPressed của bạn để gỡ lỗi
     p.keyPressed = function() {
         if (p.key === 'p' || p.key === 'P') {
             if (!soundHasStarted) {
@@ -232,12 +258,22 @@ const sketch1 = (p) => {
         }
     };
     
-    // (Toàn bộ các hàm phụ trợ và class của bạn được giữ nguyên)
     function loadSoundSafely() {
         console.log("🔊 Starting safe sound loading...");
-        
-        // Try to load with p5.sound first (most reliable)
-        loadWithP5Sound();
+        fetch('maybe.wav', { method: 'HEAD' })
+            .then(response => {
+                if (response.ok) {
+                    console.log("✅ File exists, attempting to load with p5.sound...");
+                    loadWithP5Sound();
+                } else {
+                    console.log("❌ File not found, trying HTML5 Audio...");
+                    loadWithHTML5Audio();
+                }
+            })
+            .catch(error => {
+                console.log("❌ Fetch failed, trying HTML5 Audio...", error);
+                loadWithHTML5Audio();
+            });
     }
 
     function loadWithP5Sound() {
@@ -334,7 +370,7 @@ const sketch1 = (p) => {
         p.fill(textCol);
         let quote = '"We are facing a man-made disaster on a global scale. Our greatest threat in thousands of years. Climate change."';
         let x = 1200;
-        let y = p.height - 1000;
+        let y = 80;
         let maxWidth = 400;
         p.textSize(17);
         p.textStyle(p.BOLD);
