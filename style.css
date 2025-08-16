@@ -12,8 +12,6 @@ body {
     background-color: #000;
     color: #fff;
     font-family: 'VCR OSD Mono', 'Courier New', Courier, monospace;
-    margin: 0;
-    padding: 2rem 3rem;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -60,7 +58,7 @@ body {
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
-    max-width: 1500px;
+    max-width: 1450px;
 }
 
 .student-column {
@@ -150,6 +148,7 @@ body {
 
 .footer-left {
     text-align: left;
+    padding-left: 9rem;
 }
 
 .footer-center {
@@ -159,7 +158,7 @@ body {
 .footer-right {
     text-align: right;
     align-self: end;
-    width: 57rem;
+    width: 45rem;
 }
 
 /* --- PHẦN 1: DEKAY --- */
@@ -267,13 +266,13 @@ body {
 }
 
 .section-title {
-    font-size: 29px;
+    font-size: 32px;
     font-family: "Acumin Pro Wide", sans-serif;
     font-weight: 400;
     letter-spacing: 2px;
-    word-spacing: 10px;
+    word-spacing: 8px;
     margin-bottom: 2.5rem;
-    text-align: left;
+    text-align: center;
     width: 100%;
     max-width: 1742px;
     color: white;
@@ -288,11 +287,12 @@ body {
     margin-bottom: 3rem;
     text-align: left;
     width: 100%;
-    max-width: 1742px;
+    max-width: 93%;
     color: white;
     word-wrap: break-word;
     margin-left: auto;
     margin-right: auto;
+    padding-left: 26px;
 }
 
 .section-call-to-action {
@@ -307,6 +307,8 @@ body {
     width: 100%;
     max-width: 100%;
     word-wrap: break-word;
+    padding-top: 6rem;
+    padding-bottom: 6rem;
 }
 
 .site-footer {
