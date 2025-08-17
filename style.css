@@ -16,6 +16,12 @@ body {
     flex-direction: column;
     min-height: 100vh;
     box-sizing: border-box;
+    
+    /* Performance optimizations */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
+    will-change: scroll-position;
 }
 
 /* --- HEADER --- */
@@ -386,6 +392,12 @@ body {
     position: relative;
     background-color: rgba(0, 0, 0, 0.1); /* Add background to make container visible */
     min-height: 675px; /* Ensure minimum height */
+    
+    /* Performance optimizations */
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
 }
 
 /* Lớp văn bản nằm đè lên */
