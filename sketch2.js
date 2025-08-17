@@ -499,30 +499,47 @@ const sketch2 = (p) => {
         p.noStroke();
         let textCol = p.color(255); // Using white since bgColor is not defined in this sketch
         p.fill(textCol);
+        
+        // Keep original position but make it responsive
+        let x = 1200; // Original position
+        let y = 80;   // Original position
+        let maxWidth = 400; // Original width
+        
+        // Adjust position only when screen is too small
+        if (p.width < 1400) {
+            x = p.width - 450; // Keep 50px margin from right edge
+            if (x < 20) x = 20; // Don't go off left edge
+        }
+        
+        // Responsive text sizes
+        let mainTextSize = p.width > 1200 ? 17 : p.width > 800 ? 15 : 13;
+        let attributionSize = p.width > 1200 ? 12 : p.width > 800 ? 11 : 10;
+        let callToActionSize = p.width > 1200 ? 15 : p.width > 800 ? 14 : 12;
+        
         let quote = '"We are facing a man-made disaster on a global scale. Our greatest threat in thousands of years. Climate change."';
-        let x = 1200;
-        let y = 80;
-        let maxWidth = 400;
-        p.textSize(17);
+        
+        p.textSize(mainTextSize);
         p.textStyle(p.BOLD);
         p.textFont("Source Code Pro");
         p.textAlign(p.LEFT);
         p.text(quote, x, y, maxWidth);
-        p.textSize(12);
+        
+        p.textSize(attributionSize);
         p.textStyle(p.NORMAL);
-        p.text("— Sir David Attenborough", 1220, 150, maxWidth);
-        p.textSize(15);
+        p.text("— Sir David Attenborough", x + 20, y + 70, maxWidth);
+        
+        p.textSize(callToActionSize);
         p.fill("#EB0000");
         p.textStyle(p.BOLD);
-        p.text("Cut the fumes, not our breath.", 1310, 380, 350);
+        let callToAction = "Cut the fumes, not our breath.";
+        p.text(callToAction, x + 110, y + 300, maxWidth);
         
         // Update quoteBox for hover detection (keeping the existing functionality)
-        const callToAction = "Cut the fumes, not our breath.";
         const tw = p.textWidth(callToAction);
         const th = p.textAscent() + p.textDescent();
-        quoteBox.x = 1310;
-        quoteBox.y = 380 - th;
-        quoteBox.w = 350;
+        quoteBox.x = x + 110;
+        quoteBox.y = y + 300 - th;
+        quoteBox.w = maxWidth;
         quoteBox.h = th;
     };
 
