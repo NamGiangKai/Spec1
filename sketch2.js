@@ -512,11 +512,11 @@ const sketch2 = (p) => {
         p.fill("#EB0000");
         const callToAction = "Cut the fumes, not our breath";
         p.textAlign(p.RIGHT, p.BOTTOM);
-        p.text(callToAction, p.width - margin, p.height - margin);
+        p.text(callToAction, p.width - margin, 620);
         const tw = p.textWidth(callToAction);
         const th = p.textAscent() + p.textDescent();
         const tx = p.width - margin - tw;
-        const ty = p.height - margin - th;
+        const ty = 620;;
         quoteBox.x = tx;
         quoteBox.y = ty;
         quoteBox.w = tw;
