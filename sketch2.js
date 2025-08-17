@@ -221,11 +221,16 @@ const sketch2 = (p) => {
         }
         let canvas = p.createCanvas(canvasContainer.width, canvasContainer.height);
         canvas.parent('p5-centipede-canvas');
+        
+        // Minimal performance settings - only what's safe
+        p.frameRate(60);
+        
         cols = p.floor(p.width / resolution);
         rows = p.floor(p.height / resolution);
         myCentipede = new Centipede(p.width / 2, p.height / 2, 40, 8, 0.1);
         flowFieldGraphics = p.createGraphics(p.width, p.height);
         pillarGraphics = p.createGraphics(p.width, p.height);
+        
         p.disableFriendlyErrors = true;
         
         // Load assets using sound2.js module
@@ -328,6 +333,7 @@ const sketch2 = (p) => {
             soundManager.playHoverSound();
         }
     };
+    
     p.drawFlowField = () => {
         if (p.frameCount - lastStateChangeTime > stateDuration) {
             let nextState = p.random(states);
@@ -386,6 +392,7 @@ const sketch2 = (p) => {
             }
         }
     };
+    
     p.drawPillar = () => {
         pillarGraphics.clear();
         pillarGraphics.noFill();
@@ -409,11 +416,13 @@ const sketch2 = (p) => {
         }
         addPillarShading(pillarGraphics, pillarCenterX - pillarRadius, pillarWidth);
     };
+    
     function distSqManual(v1, v2) {
         const dx = v1.x - v2.x;
         const dy = v1.y - v2.y;
         return dx * dx + dy * dy;
     }
+    
     function makeCircle(numSides, radius) {
         const points = [];
         const radiansPerStep = (p.PI * 2) / numSides;
@@ -424,6 +433,7 @@ const sketch2 = (p) => {
         }
         return points;
     }
+    
     function distortPolygon(polygon, t) {
         return polygon.map(point => {
             const x = point[0];
@@ -443,6 +453,7 @@ const sketch2 = (p) => {
             return [newX, newY];
         });
     }
+    
     function chaikin(arr, num) {
         if (num === 0) return arr;
         let currentArr = arr;
@@ -459,6 +470,7 @@ const sketch2 = (p) => {
         }
         return currentArr;
     }
+    
     function addPillarShading(pg, x, w) {
         pg.noStroke();
         let shadowWidth = 120;
@@ -482,6 +494,7 @@ const sketch2 = (p) => {
             pg.rect(x + w / 2 + i, 0, 1, p.height);
         }
     }
+    
     p.drawQuote = () => {
         p.push();
         const margin = 40;
