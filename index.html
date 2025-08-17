@@ -2,8 +2,12 @@
 <html lang="vi">
   <head>
     <!-- Tải thư viện p5.js từ CDN (chỉ cần 1 lần) -->
-    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.8/lib/p5.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.8/lib/p5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.11.8/lib/addons/p5.sound.min.js"></script>
+    
+    <!-- Performance optimization meta tags -->
+    <meta http-equiv="Page-Enter" content="blendTrans(Duration=0)">
+    <meta http-equiv="Page-Exit" content="blendTrans(Duration=0)">
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -230,6 +234,9 @@
      <script src="sound2.js"></script>
     <script src="sketch2.js"></script>
     <script src="sketch3.js"></script>
+    
+    <!-- Performance monitoring -->
+    <script src="performance-monitor.js"></script>
     
 
 
