@@ -496,32 +496,34 @@ const sketch2 = (p) => {
     }
     
     p.drawQuote = () => {
-        p.push();
-        const margin = 40;
-        const txtSize = 16;
-        p.textFont("Source Code Pro");
-        p.fill('white');
         p.noStroke();
-        p.textSize(txtSize);
-        p.textLeading(txtSize * 1.5);
-        p.textStyle(p.NORMAL);
-        const originalQuote = "We are facing a man-made disaster on a global scale.\n\n Our greatest threat in thousands of years. Climate change.\n\n" + "-SIR DAVID ATTENBOROUGH";
-        p.textAlign(p.RIGHT, p.TOP);
-        p.text(originalQuote, p.width - margin, margin);
+        let textCol = p.color(255); // Using white since bgColor is not defined in this sketch
+        p.fill(textCol);
+        let quote = '"We are facing a man-made disaster on a global scale. Our greatest threat in thousands of years. Climate change."';
+        let x = 1200;
+        let y = 80;
+        let maxWidth = 400;
+        p.textSize(17);
         p.textStyle(p.BOLD);
+        p.textFont("Source Code Pro");
+        p.textAlign(p.LEFT);
+        p.text(quote, x, y, maxWidth);
+        p.textSize(12);
+        p.textStyle(p.NORMAL);
+        p.text("— Sir David Attenborough", 1220, 150, maxWidth);
+        p.textSize(15);
         p.fill("#EB0000");
-        const callToAction = "Cut the fumes, not our breath";
-        p.textAlign(p.RIGHT, p.BOTTOM);
-        p.text(callToAction, p.width - margin, 620);
+        p.textStyle(p.BOLD);
+        p.text("Cut the fumes, not our breath.", 1310, 380, 350);
+        
+        // Update quoteBox for hover detection (keeping the existing functionality)
+        const callToAction = "Cut the fumes, not our breath.";
         const tw = p.textWidth(callToAction);
         const th = p.textAscent() + p.textDescent();
-        const tx = p.width - margin - tw;
-        const ty = 620;;
-        quoteBox.x = tx;
-        quoteBox.y = ty;
-        quoteBox.w = tw;
+        quoteBox.x = 1310;
+        quoteBox.y = 380 - th;
+        quoteBox.w = 350;
         quoteBox.h = th;
-        p.pop();
     };
 
     // Function to load assets - Sử dụng sound2.js module
