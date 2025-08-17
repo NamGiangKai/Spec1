@@ -505,9 +505,9 @@ const sketch2 = (p) => {
         let y = 80;   // Original position
         let maxWidth = 400; // Original width
         
-        // Adjust position only when screen is too small
-        if (p.width < 1400) {
-            x = p.width - 450; // Keep 50px margin from right edge
+        // Adjust position when screen is too small to prevent text cutoff
+        if (p.width < 1600) {
+            x = p.width - 420; // Keep text fully visible
             if (x < 20) x = 20; // Don't go off left edge
         }
         
@@ -533,6 +533,11 @@ const sketch2 = (p) => {
         p.textStyle(p.BOLD);
         let callToAction = "Cut the fumes, not our breath.";
         p.text(callToAction, x + 110, y + 300, maxWidth);
+        
+        // Additional safety check to prevent text cutoff
+        if (x + maxWidth > p.width - 20) {
+            maxWidth = p.width - x - 20;
+        }
         
         // Update quoteBox for hover detection (keeping the existing functionality)
         const tw = p.textWidth(callToAction);
