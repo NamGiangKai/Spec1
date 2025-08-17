@@ -16,7 +16,7 @@ const sketch1 = (p) => {
 
     p.setup = () => {
         let canvasContainer = p.select('#p5-canvas-container');
-        let canvas = p.createCanvas(canvasContainer.width, 1080);
+        let canvas = p.createCanvas(canvasContainer.width, canvasContainer.height);
         canvas.parent('p5-canvas-container');
 
         // Giữ lại các cơ chế tải an toàn và gỡ lỗi của bạn
