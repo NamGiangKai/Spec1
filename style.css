@@ -455,12 +455,13 @@ html {
 .artwork-container {
     position: relative;
     width: 100%;
-    height: 600px;
+    height: auto;
+    min-height: 675px;
     margin-top: 5rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-sizing: border-box;
     max-width: 100vw;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 /* Container cho p5.js canvas */
@@ -469,7 +470,7 @@ html {
 #p5-dekay-canvas {
     width: 100%;
     height: 675px;
-    margin-top: 5rem;
+    margin-top: 0;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-sizing: border-box;
     position: relative;
@@ -480,6 +481,7 @@ html {
     transform: translateZ(0);
     backface-visibility: hidden;
     perspective: 1000px;
+    overflow: hidden;
 }
 
 /* Lớp văn bản nằm đè lên */
@@ -495,7 +497,7 @@ html {
     flex-direction: column;
     justify-content: space-between;
     pointer-events: none;
-    margin-top: 90px;
+    margin-top: 40px;
 }
 
 /* Định dạng đoạn mô tả */
@@ -506,7 +508,7 @@ html {
     color: white;
     max-width: 450px;
     margin: 0;
-    margin-top: 90px;
+    margin-top: 40px;
 }
 
 /* Định dạng khối tiêu đề */
@@ -515,6 +517,7 @@ html {
     font-weight: 900;
     color: white;
     line-height: 1;
+    margin-bottom: 30px;
 }
 
 .artwork-title .title-line-1 {
@@ -870,10 +873,11 @@ html {
     /* Artwork containers mobile */
     .artwork-container {
         height: auto;
+        min-height: 400px;
         margin-top: 3rem;
         order: 4;
         max-width: 100%;
-        overflow-x: hidden;
+        overflow: hidden;
     }
 
     #p5-canvas-container,
@@ -881,8 +885,9 @@ html {
     #p5-dekay-canvas {
         height: 400px;
         min-height: 400px;
-        margin-top: 2rem;
+        margin-top: 0;
         max-width: 100%;
+        overflow: hidden;
     }
 
     .artwork-overlay {
@@ -890,6 +895,10 @@ html {
         margin-top: 0;
         position: relative;
         height: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 2rem;
     }
 
     .artwork-description {
@@ -897,6 +906,15 @@ html {
         margin: 1rem 0;
         max-width: 100%;
         text-align: center;
+    }
+
+    .artwork-title {
+        margin-bottom: 20px;
+        text-align: center;
+        display: block;
+        visibility: visible;
+        opacity: 1;
+        z-index: 10;
     }
 
     .artwork-title .title-line-1 {
@@ -976,6 +994,16 @@ html {
     #p5-dekay-canvas {
         height: 300px;
         min-height: 300px;
+        overflow: hidden;
+    }
+
+    .artwork-title {
+        margin-bottom: 150px;
+        text-align: center;
+        display: block;
+        visibility: visible;
+        opacity: 1;
+        z-index: 10;
     }
 
     .artwork-title .title-line-1 {
