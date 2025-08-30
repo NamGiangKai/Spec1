@@ -24,11 +24,18 @@ const sketch1 = (p) => {
     
     // Performance optimization variables
     let frameSkip = 0;
-    let maxFPS = 60;
-    let gridUpdateFrequency = 1; // Update grid every N frames
+    let maxFPS = 60; // Always maintain 60fps
+    let gridUpdateFrequency = 1;
     let particleReductionFactor = 1;
-    let contourCache = []; // Cache contour calculations
+    let contourCache = [];
     let lastContourUpdate = 0;
+    
+    // Advanced optimization variables
+    let frameTimeTarget = 16.67; // Target 60fps
+    let lastFrameTime = 0;
+    let adaptiveQuality = 1.0;
+    let performanceHistory = [];
+    let gridCache = null;
 
     function detectDeviceType() {
         const width = p.width;
@@ -37,26 +44,24 @@ const sketch1 = (p) => {
         isMobile = width < 768;
         isTablet = width >= 768 && width < 1024;
         
-        // Adjust base values for different devices with performance considerations
+        // Optimize for 60fps on all devices with adaptive quality
         if (isMobile) {
-            baseSize = 24; // Larger cells = fewer calculations
-            baseNum = 25; // Fewer blobs for better performance
-            maxFPS = 30; // Lower frame rate for mobile
-            gridUpdateFrequency = 2; // Update grid every 2 frames
-            particleReductionFactor = 0.3; // Reduce particle density significantly
+            baseSize = 28; // Optimized for 60fps
+            baseNum = 35; // Balanced for smooth animation
+            particleReductionFactor = 0.7; // Better particle density
         } else if (isTablet) {
-            baseSize = 20;
-            baseNum = 35;
-            maxFPS = 45;
-            gridUpdateFrequency = 1;
-            particleReductionFactor = 0.6;
+            baseSize = 22;
+            baseNum = 45;
+            particleReductionFactor = 0.85;
         } else {
             baseSize = 20;
             baseNum = 55;
-            maxFPS = 60;
-            gridUpdateFrequency = 1;
             particleReductionFactor = 1;
         }
+        
+        // Always target 60fps with adaptive quality
+        maxFPS = 60;
+        gridUpdateFrequency = 1;
     }
 
     function recomputeLayout() {
@@ -174,26 +179,57 @@ const sketch1 = (p) => {
         }, 100); // 100ms debounce
     };
 
-    p.draw = function () {
-        // Frame rate limiting
-        if (p.frameRate() > maxFPS) {
-            return;
+    // Performance monitoring function
+    function updatePerformance() {
+        let currentTime = performance.now();
+        let frameTime = currentTime - lastFrameTime;
+        lastFrameTime = currentTime;
+        
+        performanceHistory.push(frameTime);
+        if (performanceHistory.length > 10) {
+            performanceHistory.shift();
         }
+        
+        let avgFrameTime = performanceHistory.reduce((a, b) => a + b, 0) / performanceHistory.length;
+        
+        // Adaptive quality scaling
+        if (avgFrameTime > frameTimeTarget * 1.2) {
+            adaptiveQuality = Math.max(0.6, adaptiveQuality - 0.05);
+        } else if (avgFrameTime < frameTimeTarget * 0.8) {
+            adaptiveQuality = Math.min(1.0, adaptiveQuality + 0.02);
+        }
+    }
 
+    p.draw = function () {
+        // Performance monitoring
+        updatePerformance();
+        
         p.background(bgColor.levels[0], 20);
 
-        // Optimize grid calculations - only update every N frames on mobile
-        if (p.frameCount % gridUpdateFrequency === 0) {
-            // Tính toán giá trị grid từ các blob với tối ưu hóa
+        // Adaptive grid calculations based on performance
+        let shouldUpdateGrid = true;
+        if (isMobile && adaptiveQuality < 0.8) {
+            shouldUpdateGrid = p.frameCount % 2 === 0;
+        }
+        
+        if (shouldUpdateGrid) {
+            // Optimized grid calculations with adaptive quality
+            let qualityFactor = Math.max(0.5, adaptiveQuality);
+            let maxDistance = 8000 * qualityFactor; // Adaptive distance culling
+            
             for (let i = 0; i < cols; i++) {
                 for (let j = 0; j < rows; j++) {
                     let val = 0;
+                    let gridX = i * size;
+                    let gridY = j * size;
+                    
                     for (let k = 0; k < circles.length; k++) {
-                        let dx = i * size - circles[k].x;
-                        let dy = j * size - circles[k].y;
+                        let dx = gridX - circles[k].x;
+                        let dy = gridY - circles[k].y;
                         let distSq = dx * dx + dy * dy + 1;
-                        // Skip distant calculations for performance
-                        if (distSq < 10000) { // Only calculate if reasonably close
+                        
+                        // Adaptive distance culling
+                        if (distSq < maxDistance) {
                             val += (circles[k].r * circles[k].r) / distSq;
                         }
                     }
@@ -260,46 +296,52 @@ const sketch1 = (p) => {
             pixelPixels = contourCache;
         }
         
-        // Vẽ hiệu ứng hạt đỏ dọc theo contour với tối ưu hóa
+        // Adaptive particle rendering based on performance
         p.noStroke();
         p.fill("#EB0000");
-        let runLength = Math.floor(500 * particleReductionFactor);
+        
+        let adaptiveParticleReduction = particleReductionFactor * adaptiveQuality;
+        let runLength = Math.floor(500 * adaptiveParticleReduction);
         let contourSpeed = 1.5;
-        let particlesPerPoint = Math.floor(8 * particleReductionFactor);
+        let particlesPerPoint = Math.max(1, Math.floor(8 * adaptiveParticleReduction));
         
         // spreadRadius is now defined in recomputeLayout()
         let startIdx = (p.frameCount * contourSpeed) % pixelPixels.length;
         
-        // Use batch drawing for better performance
-        let particlesToDraw = [];
-        
-        for (let i = 0; i < runLength; i++) {
-            let idx = (p.floor(startIdx) + i) % pixelPixels.length;
-            let point = pixelPixels[idx];
-            if (point) {
-                // Add main point
-                particlesToDraw.push({
-                    x: p.floor(point.x / 20) * 20, 
-                    y: p.floor(point.y / 20) * 20
-                });
-                
-                // Add spread particles with reduced count
-                for (let j = 0; j < particlesPerPoint; j++) {
-                    let angle = p.random(p.TWO_PI);
-                    let radius = p.random(1, spreadRadius);
-                    let x = point.x + p.cos(angle) * radius;
-                    let y = point.y + p.sin(angle) * radius;
-                    particlesToDraw.push({
-                        x: p.floor(x / 20) * 20, 
-                        y: p.floor(y / 20) * 20
-                    });
+        // Optimized particle rendering with batching
+        if (pixelPixels.length > 0) {
+            let cellSize = 20;
+            let drawnCells = new Set(); // Avoid drawing duplicate cells
+            
+            for (let i = 0; i < runLength && i < pixelPixels.length; i++) {
+                let idx = (p.floor(startIdx) + i) % pixelPixels.length;
+                let point = pixelPixels[idx];
+                if (point) {
+                    // Draw main point
+                    let mainX = p.floor(point.x / cellSize) * cellSize;
+                    let mainY = p.floor(point.y / cellSize) * cellSize;
+                    let mainKey = `${mainX},${mainY}`;
+                    
+                    if (!drawnCells.has(mainKey)) {
+                        p.rect(mainX, mainY, cellSize, cellSize);
+                        drawnCells.add(mainKey);
+                    }
+                    
+                    // Draw spread particles with optimization
+                    for (let j = 0; j < particlesPerPoint; j++) {
+                        let angle = p.random(p.TWO_PI);
+                        let radius = p.random(1, spreadRadius);
+                        let x = p.floor((point.x + p.cos(angle) * radius) / cellSize) * cellSize;
+                        let y = p.floor((point.y + p.sin(angle) * radius) / cellSize) * cellSize;
+                        let key = `${x},${y}`;
+                        
+                        if (!drawnCells.has(key)) {
+                            p.rect(x, y, cellSize, cellSize);
+                            drawnCells.add(key);
+                        }
+                    }
                 }
             }
-        }
-        
-        // Draw all particles in one go
-        for (let particle of particlesToDraw) {
-            p.rect(particle.x, particle.y, 20, 20);
         }
         
         // Vẽ contour chính
@@ -354,9 +396,11 @@ const sketch1 = (p) => {
 
         drawQuote();
         
-        // Performance monitoring for debugging (remove in production)
-        if (isMobile && p.frameCount % 60 === 0) {
-            console.log(`FPS: ${p.frameRate().toFixed(1)}, Circles: ${circles.length}, Grid: ${cols}x${rows}`);
+        // Performance monitoring
+        if (p.frameCount % 120 === 0) {
+            let avgFrameTime = performanceHistory.length > 0 ? 
+                performanceHistory.reduce((a, b) => a + b, 0) / performanceHistory.length : 0;
+            console.log(`Sketch1 FPS: ${p.frameRate().toFixed(1)}, Quality: ${(adaptiveQuality * 100).toFixed(0)}%, Frame Time: ${avgFrameTime.toFixed(1)}ms, Circles: ${circles.length}`);
         }
     };
     
@@ -533,9 +577,9 @@ const sketch1 = (p) => {
     }
 
     function drawQuote() {
-        // Reduce text rendering frequency on mobile for better performance
-        if (isMobile && p.frameCount % 3 !== 0) {
-            return; // Skip text rendering on 2 out of 3 frames on mobile
+        // Adaptive text rendering based on performance
+        if (isMobile && adaptiveQuality < 0.8 && p.frameCount % 2 !== 0) {
+            return; // Skip text rendering when performance is low
         }
         
         p.noStroke();
