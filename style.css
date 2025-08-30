@@ -18,6 +18,9 @@ body {
     width: 100%;
     margin: 0;
     padding: 0;
+    /* Ensure smooth scrolling on mobile */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: auto;
 }
 
 * {
@@ -482,6 +485,8 @@ html {
     backface-visibility: hidden;
     perspective: 1000px;
     overflow: hidden;
+    /* Allow touch events to pass through for scrolling */
+    touch-action: manipulation;
 }
 
 /* Lớp văn bản nằm đè lên */
