@@ -23,6 +23,13 @@ const sketch2 = (p) => {
     let flowFieldGraphics;
     let pillarGraphics;
 
+    // Responsive variables
+    let isMobile = false;
+    let isTablet = false;
+    let baseResolution = 20;
+    let baseSegLength = 8;
+    let baseNumSegments = 40;
+
     // --- Định nghĩa các lớp ---
 
     // Lớp Centipede
@@ -213,36 +220,98 @@ const sketch2 = (p) => {
         }
     }
 
+    // Function to detect device type and set responsive parameters
+    function updateResponsiveParams() {
+        const width = p.width;
+        const height = p.height;
+        
+        // Detect device type
+        isMobile = width < 768;
+        isTablet = width >= 768 && width < 1024;
+        
+        // Adjust resolution based on screen size
+        if (isMobile) {
+            resolution = Math.max(15, Math.floor(width / 25));
+            baseNumSegments = 25;
+            baseSegLength = 6;
+        } else if (isTablet) {
+            resolution = Math.max(18, Math.floor(width / 22));
+            baseNumSegments = 32;
+            baseSegLength = 7;
+        } else {
+            resolution = baseResolution;
+            baseNumSegments = 40;
+            baseSegLength = 8;
+        }
+        
+        // Update cols and rows
+        cols = p.floor(width / resolution);
+        rows = p.floor(height / resolution);
+        
+        // Recreate centipede with new parameters
+        if (myCentipede) {
+            myCentipede = new Centipede(width / 2, height / 2, baseNumSegments, baseSegLength, 0.1);
+        }
+        
+        // Recreate graphics buffers
+        if (flowFieldGraphics) {
+            flowFieldGraphics = p.createGraphics(width, height);
+        }
+        if (pillarGraphics) {
+            pillarGraphics = p.createGraphics(width, height);
+        }
+    }
+
     p.setup = () => {
         let canvasContainer = p.select('#p5-centipede-canvas');
         if (!canvasContainer || !canvasContainer.elt) {
             console.error('Canvas container not found');
             return;
         }
-        let canvas = p.createCanvas(canvasContainer.width, canvasContainer.height);
+        
+        // Get container dimensions
+        let containerWidth = canvasContainer.width;
+        let containerHeight = canvasContainer.height;
+        
+        // Create canvas with container dimensions
+        let canvas = p.createCanvas(containerWidth, containerHeight);
         canvas.parent('p5-centipede-canvas');
         
-        // Minimal performance settings - only what's safe
-        p.frameRate(60);
+        // Set responsive parameters
+        updateResponsiveParams();
         
-        cols = p.floor(p.width / resolution);
-        rows = p.floor(p.height / resolution);
-        myCentipede = new Centipede(p.width / 2, p.height / 2, 40, 8, 0.1);
+        // Create centipede with responsive parameters
+        myCentipede = new Centipede(p.width / 2, p.height / 2, baseNumSegments, baseSegLength, 0.1);
+        
+        // Create graphics buffers
         flowFieldGraphics = p.createGraphics(p.width, p.height);
         pillarGraphics = p.createGraphics(p.width, p.height);
         
+        // Performance settings
+        p.frameRate(60);
         p.disableFriendlyErrors = true;
         
         // Load assets using sound2.js module
         loadAssets();
+        
+        console.log(`🎯 Canvas created: ${p.width}x${p.height}, Device: ${isMobile ? 'Mobile' : isTablet ? 'Tablet' : 'Desktop'}`);
     };
 
     p.windowResized = () => {
-        p.resizeCanvas(p.windowWidth, p.windowHeight);
-        cols = p.floor(p.width / resolution);
-        rows = p.floor(p.height / resolution);
-        flowFieldGraphics = p.createGraphics(p.width, p.height);
-        pillarGraphics = p.createGraphics(p.width, p.height);
+        // Get container dimensions
+        let canvasContainer = p.select('#p5-centipede-canvas');
+        if (canvasContainer && canvasContainer.elt) {
+            let containerWidth = canvasContainer.width;
+            let containerHeight = canvasContainer.height;
+            
+            // Resize canvas to container
+            p.resizeCanvas(containerWidth, containerHeight);
+            
+            // Update responsive parameters
+            updateResponsiveParams();
+            
+            console.log(`🔄 Canvas resized: ${p.width}x${p.height}`);
+        }
     };
 
     p.draw = () => {
@@ -251,25 +320,45 @@ const sketch2 = (p) => {
         p.drawPillar();
         p.image(flowFieldGraphics, 0, 0);
         p.image(pillarGraphics, 0, 0);
-        myCentipede.update(p.createVector(p.mouseX, p.mouseY));
+        
+        // Update centipede with mouse or touch position
+        let targetX = p.mouseX;
+        let targetY = p.mouseY;
+        
+        // Handle touch events for mobile
+        if (p.touches && p.touches.length > 0) {
+            targetX = p.touches[0].x;
+            targetY = p.touches[0].y;
+        }
+        
+        myCentipede.update(p.createVector(targetX, targetY));
         myCentipede.show();
         p.drawQuote();
         p.checkHover();
 
-        // Vẽ nút mute/unmute
+        // Vẽ nút mute/unmute với responsive positioning
+        let muteButtonSize = isMobile ? 40 : 50;
+        let muteButtonX = isMobile ? 15 : 20;
+        let muteButtonY = isMobile ? 15 : 20;
+        
         if (isMuted) {
             if (soundManager && soundManager.muteIcon) {
-                p.image(soundManager.muteIcon, 20, 20, 50, 50);
+                p.image(soundManager.muteIcon, muteButtonX, muteButtonY, muteButtonSize, muteButtonSize);
             }
         } else {
             if (soundManager && soundManager.unmuteIcon) {
-                p.image(soundManager.unmuteIcon, 20, 20, 50, 50);
+                p.image(soundManager.unmuteIcon, muteButtonX, muteButtonY, muteButtonSize, muteButtonSize);
             }
         }
         time += 0.005;
     };
 
     p.mousePressed = () => {
+        // Check if click is on mute button with responsive positioning
+        let muteButtonSize = isMobile ? 40 : 50;
+        let muteButtonX = isMobile ? 15 : 20;
+        let muteButtonY = isMobile ? 15 : 20;
+        
         // Lần nhấn chuột đầu tiên (bất cứ đâu) để BẮT ĐẦU âm thanh
         if (!soundHasStarted) {
             if (soundManager && soundManager.testSound && soundManager.testSound.isLoaded()) {
@@ -285,7 +374,8 @@ const sketch2 = (p) => {
         }
         // Các lần nhấn chuột SAU ĐÓ chỉ để BẬT/TẮT tiếng khi nhấn vào icon
         else {
-            if (p.mouseX > 20 && p.mouseX < 70 && p.mouseY > 20 && p.mouseY < 70) {
+            if (p.mouseX > muteButtonX && p.mouseX < muteButtonX + muteButtonSize && 
+                p.mouseY > muteButtonY && p.mouseY < muteButtonY + muteButtonSize) {
                 isMuted = !isMuted; // Đảo ngược trạng thái
                 if (soundManager && soundManager.testSound && soundManager.testSound.isLoaded()) {
                     soundManager.testSound.setVolume(isMuted ? 0 : 1);
@@ -298,6 +388,12 @@ const sketch2 = (p) => {
                 }
             }
         }
+    };
+    
+    // Handle touch events for mobile
+    p.touchStarted = () => {
+        p.mousePressed();
+        return false; // Prevent default touch behavior
     };
     
     p.keyPressed = () => {
@@ -398,9 +494,12 @@ const sketch2 = (p) => {
         pillarGraphics.noFill();
         pillarGraphics.stroke(0, 0, 0);
         pillarGraphics.strokeWeight(2);
-        const pillarWidth = 200;
+        
+        // Responsive pillar sizing
+        const pillarWidth = isMobile ? 120 : isTablet ? 160 : 200;
         const pillarRadius = pillarWidth / 2;
         const pillarCenterX = p.width / 2;
+        
         for (let radius = 0.05; radius < 0.7; radius += 0.015) {
             const circle = makeCircle(20, radius);
             const distortedCircle = distortPolygon(circle, time);
@@ -473,14 +572,14 @@ const sketch2 = (p) => {
     
     function addPillarShading(pg, x, w) {
         pg.noStroke();
-        let shadowWidth = 120;
+        let shadowWidth = isMobile ? 60 : isTablet ? 90 : 120;
         for (let i = 0; i < shadowWidth; i++) {
             let alpha = p.map(i, 0, shadowWidth, 180, 0);
             pg.fill(0, alpha);
             pg.rect(x + i, 0, 1, p.height);
             pg.rect(x + w - 1 - i, 0, 1, p.height);
         }
-        let highlightWidth = 40;
+        let highlightWidth = isMobile ? 20 : isTablet ? 30 : 40;
         for (let i = 0; i < highlightWidth; i++) {
             let alpha = p.map(i, 0, highlightWidth, 40, 0);
             pg.fill(222, alpha);
@@ -500,21 +599,48 @@ const sketch2 = (p) => {
         let textCol = p.color(255); // Using white since bgColor is not defined in this sketch
         p.fill(textCol);
         
-        // Keep original position but make it responsive
-        let x = 1200; // Original position
-        let y = 80;   // Original position
-        let maxWidth = 400; // Original width
+        // Responsive positioning and sizing
+        let maxWidth, x, y;
         
-        // Adjust position when screen is too small to prevent text cutoff
-        if (p.width < 1600) {
-            x = p.width - 420; // Keep text fully visible
-            if (x < 20) x = 20; // Don't go off left edge
+        if (isMobile) {
+            // Mobile layout - centered and smaller
+            maxWidth = p.width * 0.85;
+            x = (p.width - maxWidth) / 2;
+            y = p.height * 0.1;
+        } else if (isTablet) {
+            // Tablet layout - right side but smaller
+            maxWidth = p.width * 0.4;
+            x = p.width - maxWidth - 20;
+            y = p.height * 0.08;
+        } else {
+            // Desktop layout - original positioning
+            maxWidth = 400;
+            x = 1200;
+            y = 80;
+            
+            // Adjust position when screen is too small to prevent text cutoff
+            if (p.width < 1600) {
+                x = p.width - 420; // Keep text fully visible
+                if (x < 20) x = 20; // Don't go off left edge
+            }
         }
         
         // Responsive text sizes
-        let mainTextSize = p.width > 1200 ? 17 : p.width > 800 ? 15 : 13;
-        let attributionSize = p.width > 1200 ? 12 : p.width > 800 ? 11 : 10;
-        let callToActionSize = p.width > 1200 ? 15 : p.width > 800 ? 14 : 12;
+        let mainTextSize, attributionSize, callToActionSize;
+        
+        if (isMobile) {
+            mainTextSize = 14;
+            attributionSize = 10;
+            callToActionSize = 12;
+        } else if (isTablet) {
+            mainTextSize = 16;
+            attributionSize = 11;
+            callToActionSize = 13;
+        } else {
+            mainTextSize = p.width > 1200 ? 17 : p.width > 800 ? 15 : 13;
+            attributionSize = p.width > 1200 ? 12 : p.width > 800 ? 11 : 10;
+            callToActionSize = p.width > 1200 ? 15 : p.width > 800 ? 14 : 12;
+        }
         
         let quote = '"We are facing a man-made disaster on a global scale. Our greatest threat in thousands of years. Climate change."';
         
