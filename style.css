@@ -62,6 +62,7 @@ body {
     width: 100%;
     margin: 0 auto;
     text-align: center;
+    position: relative;
 }
 
 /* Main Title - DEKAY */
@@ -71,8 +72,9 @@ body {
     font-weight: 900;
     color: #fff;
     text-align: center;
-    margin: 2rem 0 -3rem 0;
+    margin: 1rem 0 -3rem 0;
     letter-spacing: 0.5rem;
+    opacity: 0.175;
 }
 
 /* Student Information Container */
@@ -128,21 +130,31 @@ body {
 
 /* Quote Container */
 .quote-container {
-    text-align: center;
-    max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    width: 1500px;
+    position: absolute;
+    top: 18%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: left;
+    max-width: 800px;
+    width: 800px;
+    z-index: 10;
+    pointer-events: none;
 }
 
 .quote-text {
     font-family: 'Source Code Pro', monospace;
     font-size: 1.1rem;
-    font-weight: 400;
+    text-align: center;
+    font-weight: bold;
     color: #fff;
     line-height: 1.4;
     margin-bottom: 1rem;
     text-transform: uppercase;
+    word-spacing: 0.1em;
+}
+
+.climate-change-red {
+    color: #ff0000;
 }
 
 .quote-attribution {
@@ -150,9 +162,9 @@ body {
     font-size: 0.8rem;
     font-weight: 400;
     color: #fff;
-    text-align: right;
+    text-align: center;
     opacity: 0.9;
-    margin-right: 10rem;
+    margin-top: 1rem;
 }
 
 /* Footer Container */
@@ -254,33 +266,44 @@ body {
 }
 
 .new-section {
-    text-align: center;
+    text-align: left;
     margin: 0 auto;
     padding: 0 3rem;
 }
 
+.top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+}
+
 .separator-line {
-    width: 75px;
-    height: 390px;
+    width: 135px;
+    height: 960px;
     background-color: black;
     position: absolute;
-    transform: rotate(40deg);
+    transform: rotate(30deg);
     z-index: 9999;
+    left: -100px;
+    top: -50px;
 }
 
 .section-number {
     font-family: "Acumin Pro Wide", sans-serif;
-    font-size: 15rem;
+    font-size: 16rem;
     font-weight: 900;
     line-height: 1;
     color: #fff;
-    text-shadow: 0 slot 20px rgba(224, 34, 58, .6);
-    margin-bottom: 2rem;
+    
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
     overflow: hidden;
     height: 15rem;
+    flex-shrink: 0;
+    margin-left: 230px;
+    transform: translateY(180px);
 }
 
 .digit-container {
@@ -303,33 +326,39 @@ body {
 }
 
 .section-title {
-    font-size: 32px;
-    font-family: "Acumin Pro Wide", sans-serif;
+    font-size: 28px;
+    font-family: 'Source Code Pro', monospace;
     font-weight: 400;
     letter-spacing: 2px;
     word-spacing: 8px;
-    margin-bottom: 2.5rem;
-    text-align: center;
-    width: 100%;
-    max-width: 1742px;
+    margin-bottom: 0;
+    text-align: left;
+    width: 90%;
+    max-width: 600px;
     color: white;
     word-wrap: break-word;
+    line-height: 1.2;
+    margin-top: 110px;
+    position: relative;
+    top: -50px;
+    margin-left: 700px;
 }
 
 .section-paragraph {
     font-family: "Source Code Pro", monospace;
-    font-size: 18px;
+    font-size: 17.75px;
     font-weight: 400;
     opacity: .9;
     margin-bottom: 3rem;
     text-align: left;
     width: 100%;
-    max-width: 93%;
+    max-width: 77%;
     color: white;
     word-wrap: break-word;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 26px;
+    line-height: 1.6;
+    text-transform: uppercase;
+    padding-left: 176px;
+    margin-top: 70px;
 }
 
 .section-call-to-action {
@@ -337,15 +366,17 @@ body {
     font-weight: 400;
     font-size: 24px;
     letter-spacing: 2px;
-    color: white;
-    opacity: 0.8;
+    color: #ff0000;
     text-transform: uppercase;
     text-align: center;
     width: 100%;
     max-width: 100%;
     word-wrap: break-word;
-    padding-top: 6rem;
-    padding-bottom: 6rem;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    font-weight: bold;
+    margin-left: 300px;
+    margin-top: 30px;
 }
 
 .site-footer {
@@ -511,172 +542,293 @@ body {
 }
 
 /* --- RESPONSIVE DESIGN --- */
+/* Tablet và màn hình nhỏ - giữ nguyên layout desktop */
 @media (max-width: 1024px) {
     .main-title {
-        font-size: 6rem;
-        letter-spacing: 0.3rem;
+        font-size: 18rem;
+        letter-spacing: 0.4rem;
     }
 
     .student-info-container {
         gap: 3rem;
-    }
-
-    .quote-text {
-        font-size: 1.3rem;
-    }
-
-    .top-section {
-        flex-direction: column;
-        text-align: center;
-        gap: 2.5rem;
-        margin-bottom: 8rem;
-    }
-
-    .separator {
-        display: none;
-    }
-
-    .logo .char-large {
-        font-size: 8rem;
-    }
-
-    .logo .char-small {
-        font-size: 4.5rem;
-    }
-
-    .new-section {
-        padding: 0 2rem;
-    }
-
-    .section-number,
-    .digit-container,
-    .digit div {
-        font-size: 12rem;
-        height: 12rem;
-    }
-
-    .section-title {
-        font-size: 1.6rem;
-    }
-
-    .section-paragraph {
-        font-size: 0.95rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .main-title {
-        font-size: 4rem;
-        letter-spacing: 0.2rem;
-        margin: 1rem 0 2rem 0;
-    }
-
-    .student-info-container {
-        flex-direction: column;
-        gap: 2rem;
-    }
-
-    .student-column {
-        min-width: auto;
+        max-width: 1200px;
     }
 
     .quote-container {
-        margin: 2rem 0;
-        padding: 0 1rem;
+        width: 90%;
+        max-width: 700px;
     }
 
-    .quote-text {
-        font-size: 1.1rem;
+    .section-number {
+        font-size: 14rem;
+        height: 13rem;
+        margin-left: 200px;
     }
 
-    .footer-container {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
+    .digit-container,
+    .digit div {
+        height: 13rem;
+        line-height: 13rem;
     }
 
-    .footer-left,
-    .footer-right {
-        text-align: center;
+    .section-title {
+        font-size: 24px;
+        margin-left: 600px;
     }
 
+    .section-paragraph {
+        font-size: 16px;
+        padding-left: 150px;
+    }
+
+    .section-call-to-action {
+        font-size: 22px;
+        margin-left: 250px;
+    }
+}
+
+/* Mobile - thay đổi layout hoàn toàn */
+@media (max-width: 768px) {
     body {
-        padding: 1.5rem;
+        padding: 1rem;
     }
 
+    /* Header mobile */
     .site-header {
-        margin-bottom: 3rem;
+        margin-bottom: 2rem;
     }
     
     .header-content {
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.5rem;
         align-items: center;
+        text-align: center;
+        display: flex;
     }
     
     .logo-container {
-        margin-left: -20px;
+        margin-left: 0;
+        order: 2; /* Đặt logo xuống dưới */
     }
     
     .dekay-logo {
-        width: 120px;
-        max-height: 90px;
+        width: 240px;
+        max-height: 205px;
     }
     
     .school-info {
         text-align: center;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        order: 1; /* Đặt school-info lên trên */
     }
 
-    .top-section {
-        margin-bottom: 6rem;
+    /* Main content container - Sử dụng flexbox để sắp xếp thứ tự */
+    .main-content {
+        display: flex;
+        flex-direction: column;
     }
 
-    .quote {
-        font-size: 20px;
+    /* Quote container mobile - Đặt ở trên main-title */
+    .quote-container {
+        position: relative;
+        top: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60%;
+        max-width: 60%;
+        text-align: center;
+        margin: 0 0 2rem 0;
+        pointer-events: auto;
+        order: -1; /* Đặt lên trên */
     }
 
-    .attribution {
-        font-size: 1.2rem;
+    .quote-text {
+        font-size: 0.7rem !important;
+        line-height: 1.3 !important;
+        margin-bottom: 0.5rem !important;
+        text-align: center !important;
+        word-spacing: 0.1em !important;
+        letter-spacing: 0.05em !important;
     }
 
-    .logo .char-large {
-        font-size: 6rem;
+    .climate-change-red {
+        color: #ff0000 !important;
+        font-weight: bold !important;
     }
 
-    .logo .char-small {
-        font-size: 3.5rem;
+    .quote-attribution {
+        font-size: 0.6rem !important;
+        margin-top: 0.5rem !important;
+        opacity: 0.9 !important;
+        text-align: center !important;
     }
 
+    /* Main title mobile */
+    .main-title {
+        font-size: 8rem;
+        letter-spacing: 0.2rem;
+        margin: 1rem 0 0.5rem 0;
+        order: 0; /* Thứ tự bình thường */
+    }
+
+    /* Student info mobile - Hiển thị trên cùng 1 hàng với khoảng cách vừa phải */
+    .student-info-container {
+        flex-direction: row;
+        gap: 3rem;
+        margin-bottom: 3rem;
+        margin-top: -4.5rem;
+        order: 1; /* Sau main-title */
+        justify-content: center;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+
+    .student-column {
+        min-width: auto;
+        text-align: center;
+        flex: 0 1 auto;
+        max-width: 250px;
+    }
+
+    #student3,
+    #studentid3,
+    #student2,
+    #studentid2 {
+        padding-left: 0 !important;
+    }
+
+    .student-name {
+        font-size: 0.5rem;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+        text-transform: uppercase;
+        white-space: nowrap;
+        overflow: visible;
+    }
+
+    .student-id {
+        font-size: 0.6rem;
+        white-space: nowrap;
+        overflow: visible;
+    }
+
+    /* Footer mobile */
+    .footer-container {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+        margin-top: 2rem;
+        order: 2; /* Sau student info */
+    }
+
+    .footer-left,
+    .footer-center,
+    .footer-right {
+        text-align: center;
+        margin: 0;
+    }
+
+    /* Section mobile */
     .new-section {
         padding: 0 1rem;
+        margin-top: 2rem;
+        order: 3; /* Sau footer */
     }
 
-    .section-number,
+    .separator-line {
+        display: none;
+    }
+
+    .section-number {
+        font-size: 8rem;
+        height: 8rem;
+        margin-left: 0;
+        transform: none;
+        justify-content: center;
+        text-align: center;
+    }
+
     .digit-container,
     .digit div {
-        font-size: 9rem;
-        height: 9rem;
+        height: 8rem;
+        line-height: 8rem;
     }
 
     .section-title {
         font-size: 1.4rem;
+        margin: 2rem 0 1rem 0;
+        margin-left: 0;
+        top: 0;
+        text-align: center;
+        width: 100%;
+        max-width: 100%;
     }
 
     .section-paragraph {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         text-align: left;
+        padding-left: 0;
+        margin-top: 1rem;
+        max-width: 100%;
+        line-height: 1.5;
+        margin-bottom: 1rem;
     }
 
     .section-call-to-action {
-        font-size: 1rem;
+        font-size: 1.2rem;
+        margin: 2rem 0;
+        margin-left: 0;
+        text-align: center;
     }
 
+    /* Artwork containers mobile */
+    .artwork-container {
+        height: auto;
+        margin-top: 3rem;
+        order: 4; /* Cuối cùng */
+    }
+
+    #p5-canvas-container,
+    #p5-centipede-canvas,
+    #p5-dekay-canvas {
+        height: 400px;
+        min-height: 400px;
+        margin-top: 2rem;
+    }
+
+    .artwork-overlay {
+        padding: 20px;
+        margin-top: 0;
+        position: relative;
+        height: auto;
+    }
+
+    .artwork-description {
+        font-size: 14px;
+        margin: 1rem 0;
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .artwork-title .title-line-1 {
+        font-size: 32px;
+        text-align: center;
+    }
+
+    .artwork-title .title-line-2 {
+        font-size: 64px;
+        text-align: center;
+    }
+
+    /* Site footer mobile */
     .site-footer {
         flex-direction: column;
         align-items: center;
         text-align: center;
-        gap: 2.5rem;
-        margin-top: 6rem;
+        gap: 2rem;
+        margin-top: 4rem;
+        padding: 0 1rem;
     }
 
     .footer-left {
@@ -689,25 +841,92 @@ body {
     }
 
     .student-info {
-        width: 300px;
+        width: 100%;
+        max-width: 300px;
     }
 }
 
+/* Mobile nhỏ */
 @media (max-width: 480px) {
     .main-title {
-        font-size: 3rem;
+        font-size: 6rem;
         letter-spacing: 0.1rem;
     }
 
     .quote-text {
-        font-size: 1rem;
-    }
-
-    .student-name {
-        font-size: 1rem;
-    }
-
-    .student-id {
         font-size: 0.9rem;
+    }
+
+    .section-number {
+        font-size: 6rem;
+        height: 6rem;
+    }
+
+    .digit-container,
+    .digit div {
+        height: 6rem;
+        line-height: 6rem;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+    }
+
+    .section-paragraph {
+        font-size: 0.9rem;
+    }
+
+    .section-call-to-action {
+        font-size: 1.1rem;
+    }
+
+    #p5-canvas-container,
+    #p5-centipede-canvas,
+    #p5-dekay-canvas {
+        height: 300px;
+        min-height: 300px;
+    }
+
+    .artwork-title .title-line-1 {
+        font-size: 28px;
+    }
+
+    .artwork-title .title-line-2 {
+        font-size: 56px;
+    }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .main-title {
+        font-size: 6rem;
+        margin: 0.5rem 0;
+    }
+
+    .student-info-container {
+        flex-direction: row;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-number {
+        font-size: 6rem;
+        height: 6rem;
+    }
+
+    .digit-container,
+    .digit div {
+        height: 6rem;
+        line-height: 6rem;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        margin: 1rem 0;
+    }
+
+    .section-paragraph {
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
     }
 }
