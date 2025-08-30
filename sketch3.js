@@ -76,19 +76,86 @@ const industrialSketch = (p) => {
 
   // ---- responsive scaling ----
   let scaleUI = 1; // relative to 1920x1080
+  
+  // Responsive variables
+  let isMobile = false;
+  let isTablet = false;
+  let baseGearRad = 125;
+  let baseGearOffset = 150;
+
+  function detectDeviceType() {
+    const width = p.width;
+    const height = p.height;
+    
+    isMobile = width < 768;
+    isTablet = width >= 768 && width < 1024;
+    
+    // Adjust base values for different devices
+    if (isMobile) {
+      baseGearRad = 65;  // Giảm từ 80 xuống 65
+      baseGearOffset = 85; // Giảm từ 100 xuống 85
+    } else if (isTablet) {
+      baseGearRad = 100;
+      baseGearOffset = 125;
+    } else {
+      baseGearRad = 125;
+      baseGearOffset = 150;
+    }
+  }
 
   function recomputeLayout() {
     const baseW = 1920, baseH = 1080;
     scaleUI = Math.min(p.width / baseW, p.height / baseH);
 
-    gearRad = Math.max(70, 125 * scaleUI);
-    gearOffset = 150 * scaleUI;
-    miniRMin = gearRad * 0.08;
-    miniRMax = gearRad * 1.0;
-
-    leftX = p.width / 2 - gearOffset;
-    rightX = p.width / 2 + gearOffset;
-    cy = p.height / 2 - 200 * scaleUI;
+    // Apply device-specific scaling
+    detectDeviceType();
+    
+    // Calculate gear size and position based on screen dimensions
+    gearRad = Math.max(50, baseGearRad * scaleUI);
+    gearOffset = baseGearOffset * scaleUI;
+    
+    // Mobile-specific positioning adjustments
+    if (isMobile) {
+      // On mobile, keep gears in the same relative position to mask image as desktop
+      // But ensure they don't go off screen
+      const maxGearSize = Math.min(p.width * 0.08, p.height * 0.08); // Giảm từ 0.18 xuống 0.15
+      gearRad = Math.min(gearRad, maxGearSize);
+      
+      // Calculate the same relative position as desktop
+      // Desktop: leftX = p.width/2 - 150, rightX = p.width/2 + 150, cy = p.height/2 - 200
+      // Mobile: maintain same proportions but scaled, but move down a bit
+      const desktopLeftRatio = (1920/2 - 150) / 1920; // Left gear position ratio
+      const desktopRightRatio = (1920/2 + 150) / 1920; // Right gear position ratio
+      const desktopCenterYRatio = (1080/2 - 150) / 1080; // Center Y position ratio - move down from -200 to -150
+      
+      leftX = p.width * desktopLeftRatio;
+      rightX = p.width * desktopRightRatio;
+      cy = p.height * desktopCenterYRatio;
+      
+      // Ensure gears don't go off screen
+      const minMargin = gearRad + 15;
+      if (leftX < minMargin) leftX = minMargin;
+      if (rightX > p.width - minMargin) rightX = minMargin;
+      if (cy < minMargin) cy = minMargin;
+      if (cy > p.height - minMargin) cy = minMargin;
+      
+      // Recalculate gearOffset based on actual positions
+      gearOffset = (rightX - leftX) / 2;
+      
+    } else {
+      // Desktop/Tablet logic - keep original positioning
+      // Ensure gears don't go off screen - calculate maximum safe offset
+      const minGearOffset = gearRad + 20; // Minimum distance from edge
+      const maxGearOffset = Math.min(p.width / 2 - minGearOffset, p.height / 2 - minGearOffset);
+      gearOffset = Math.min(gearOffset, maxGearOffset);
+      
+      // Standard vertical positioning
+      cy = p.height / 2 - 200 * scaleUI;
+      
+      // Responsive gear positioning - center gears based on screen size
+      leftX = p.width / 2 - gearOffset;
+      rightX = p.width / 2 + gearOffset;
+    }
 
     // grid tile scales within bounds
     TILE = Math.round(80 * scaleUI);
@@ -97,6 +164,8 @@ const industrialSketch = (p) => {
     // number of mini gears scales by area
     miniGearsTarget = Math.round(200 * scaleUI * scaleUI);
     miniGearsTarget = Math.max(60, Math.min(miniGearsTarget, 220));
+    
+    console.log(`🎯 Layout updated: ${p.width}x${p.height}, Device: ${isMobile ? 'Mobile' : isTablet ? 'Tablet' : 'Desktop'}, Scale: ${scaleUI.toFixed(2)}, GearRad: ${gearRad.toFixed(1)}, Offset: ${gearOffset.toFixed(1)}, leftX: ${leftX.toFixed(1)}, rightX: ${rightX.toFixed(1)}, cy: ${cy.toFixed(1)}`);
   }
 
   p.setup = () => {
@@ -538,21 +607,48 @@ const industrialSketch = (p) => {
     let textCol = p.color(255);
     p.fill(textCol);
 
-    // Keep original position but make it responsive
-    let x = QUOTE_BASE_X; // Original position
-    let y = QUOTE_BASE_Y;   // Original position
-    let maxWidth = QUOTE_BASE_W; // Original width
-
-    // Adjust position when screen is too small to prevent text cutoff
-    if (p.width < 1600) {
-      x = p.width - 420; // Keep text fully visible
-      if (x < 20) x = 20; // Don't go off left edge
+    // Responsive positioning and sizing
+    let maxWidth, x, y;
+    
+    if (isMobile) {
+      // Mobile layout - keep text on right side like desktop, but smaller
+      maxWidth = p.width * 0.6; // Smaller width for mobile
+      x = p.width - maxWidth - 15; // Right side with small margin
+      y = p.height * 0.08; // Top area like desktop
+      
+      // Ensure text doesn't go off screen
+      if (x < 15) x = 15;
+    } else if (isTablet) {
+      // Tablet layout - right side but smaller
+      maxWidth = p.width * 0.4;
+      x = p.width - maxWidth - 20;
+      y = p.height * 0.08;
+    } else {
+      // Desktop layout - original positioning but responsive
+      maxWidth = QUOTE_BASE_W;
+      x = p.width - maxWidth - 20; // Always keep text fully visible
+      y = p.height * 0.08;
+      
+      // Ensure text doesn't go off screen
+      if (x < 20) x = 20;
     }
 
     // Responsive text sizes
-    let mainTextSize = p.width > 1200 ? 17 : p.width > 800 ? 15 : 13;
-    let attributionSize = p.width > 1200 ? 12 : p.width > 800 ? 11 : 10;
-    let callToActionSize = p.width > 1200 ? 15 : p.width > 800 ? 14 : 12;
+    let mainTextSize, attributionSize, callToActionSize;
+    
+    if (isMobile) {
+      mainTextSize = 13; // Slightly smaller for mobile
+      attributionSize = 9;
+      callToActionSize = 11;
+    } else if (isTablet) {
+      mainTextSize = 16;
+      attributionSize = 11;
+      callToActionSize = 13;
+    } else {
+      mainTextSize = p.width > 1200 ? 17 : p.width > 800 ? 15 : 13;
+      attributionSize = p.width > 1200 ? 12 : p.width > 800 ? 11 : 10;
+      callToActionSize = p.width > 1200 ? 15 : p.width > 800 ? 14 : 12;
+    }
 
     let quote = '"We are facing a man-made disaster on a global scale. Our greatest threat in thousands of years. Climate change."';
 
@@ -573,8 +669,8 @@ const industrialSketch = (p) => {
     p.text(callToAction, x + CTA_DX, y + CTA_DY, maxWidth);
 
     // Additional safety check to prevent text cutoff
-    if (x + maxWidth > p.width - 20) {
-      maxWidth = p.width - x - 20;
+    if (x + maxWidth > p.width - 15) {
+      maxWidth = p.width - x - 15;
     }
 
     // Update quoteBox for hover detection
