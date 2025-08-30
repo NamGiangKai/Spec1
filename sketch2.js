@@ -531,9 +531,30 @@ const sketch2 = (p) => {
     };
     
     // Handle touch events for mobile
-    p.touchStarted = () => {
+    p.touchStarted = (event) => {
+        // Only handle touch if it's within canvas bounds and not a scroll gesture
+        let canvasElement = document.getElementById('p5-centipede-canvas');
+        if (!canvasElement) return;
+        
+        let rect = canvasElement.getBoundingClientRect();
+        let touch = event.touches ? event.touches[0] : event;
+        let touchX = touch.clientX - rect.left;
+        let touchY = touch.clientY - rect.top;
+        
+        // Check if touch is on mute button - only prevent default for button interactions
+        let muteButtonSize = isMobile ? 40 : 50;
+        let muteButtonX = isMobile ? 15 : 20;
+        let muteButtonY = isMobile ? 15 : 20;
+        
+        if (touchX > muteButtonX && touchX < muteButtonX + muteButtonSize && 
+            touchY > muteButtonY && touchY < muteButtonY + muteButtonSize) {
+            p.mousePressed();
+            return false; // Only prevent default for button interactions
+        }
+        
+        // For other touches, allow normal scrolling behavior
         p.mousePressed();
-        return false; // Prevent default touch behavior
+        // Don't return false - allow default touch behavior for scrolling
     };
     
     p.keyPressed = () => {
