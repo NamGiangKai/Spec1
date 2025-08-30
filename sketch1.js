@@ -21,6 +21,14 @@ const sketch1 = (p) => {
     let isTablet = false;
     let baseSize = 20;
     let baseNum = 55;
+    
+    // Performance optimization variables
+    let frameSkip = 0;
+    let maxFPS = 60;
+    let gridUpdateFrequency = 1; // Update grid every N frames
+    let particleReductionFactor = 1;
+    let contourCache = []; // Cache contour calculations
+    let lastContourUpdate = 0;
 
     function detectDeviceType() {
         const width = p.width;
@@ -29,16 +37,25 @@ const sketch1 = (p) => {
         isMobile = width < 768;
         isTablet = width >= 768 && width < 1024;
         
-        // Adjust base values for different devices
+        // Adjust base values for different devices with performance considerations
         if (isMobile) {
-            baseSize = 16;
-            baseNum = 40;
+            baseSize = 24; // Larger cells = fewer calculations
+            baseNum = 25; // Fewer blobs for better performance
+            maxFPS = 30; // Lower frame rate for mobile
+            gridUpdateFrequency = 2; // Update grid every 2 frames
+            particleReductionFactor = 0.3; // Reduce particle density significantly
         } else if (isTablet) {
-            baseSize = 18;
-            baseNum = 50;
+            baseSize = 20;
+            baseNum = 35;
+            maxFPS = 45;
+            gridUpdateFrequency = 1;
+            particleReductionFactor = 0.6;
         } else {
             baseSize = 20;
             baseNum = 55;
+            maxFPS = 60;
+            gridUpdateFrequency = 1;
+            particleReductionFactor = 1;
         }
     }
 
@@ -96,6 +113,9 @@ const sketch1 = (p) => {
 
         // compute responsive layout
         recomputeLayout();
+        
+        // Set target frame rate based on device
+        p.frameRate(maxFPS);
 
         // FIX: Sử dụng Math.ceil để đảm bảo đủ ô lưới
         cols = Math.ceil(p.width / size) + 1;
@@ -117,45 +137,68 @@ const sketch1 = (p) => {
     };
 
     p.windowResized = () => {
-        let canvasContainer = p.select('#p5-canvas-container');
-        p.resizeCanvas(canvasContainer.width, canvasContainer.height);
-        
-        // compute responsive layout
-        recomputeLayout();
-        
-        // FIX: Cập nhật lại grid với kích thước mới
-        cols = Math.ceil(p.width / size) + 1;
-        rows = Math.ceil(p.height / size) + 1;
-        
-        // Tạo lại grid với kích thước mới
-        grid = [];
-        for (let i = 0; i < cols; i++) {
-            grid[i] = [];
-            for (let j = 0; j < rows; j++) {
-                grid[i][j] = 0;
+        // Debounce resize events for better performance
+        clearTimeout(window.resizeTimeout);
+        window.resizeTimeout = setTimeout(() => {
+            let canvasContainer = p.select('#p5-canvas-container');
+            p.resizeCanvas(canvasContainer.width, canvasContainer.height);
+            
+            // compute responsive layout
+            recomputeLayout();
+            
+            // Set new frame rate
+            p.frameRate(maxFPS);
+            
+            // FIX: Cập nhật lại grid với kích thước mới
+            cols = Math.ceil(p.width / size) + 1;
+            rows = Math.ceil(p.height / size) + 1;
+            
+            // Tạo lại grid với kích thước mới
+            grid = [];
+            for (let i = 0; i < cols; i++) {
+                grid[i] = [];
+                for (let j = 0; j < rows; j++) {
+                    grid[i][j] = 0;
+                }
             }
-        }
-        
-        // Reset các blob với số lượng mới
-        circles = [];
-        for (let i = 0; i < num; i++) {
-            circles.push(new Circle());
-        }
+            
+            // Reset các blob với số lượng mới
+            circles = [];
+            for (let i = 0; i < num; i++) {
+                circles.push(new Circle());
+            }
+            
+            // Clear caches
+            contourCache = [];
+            lastContourUpdate = 0;
+        }, 100); // 100ms debounce
     };
 
     p.draw = function () {
+        // Frame rate limiting
+        if (p.frameRate() > maxFPS) {
+            return;
+        }
+
         p.background(bgColor.levels[0], 20);
 
-        // Tính toán giá trị grid từ các blob
-        for (let i = 0; i < cols; i++) {
-            for (let j = 0; j < rows; j++) {
-                let val = 0;
-                for (let k = 0; k < circles.length; k++) {
-                    let dx = i * size - circles[k].x;
-                    let dy = j * size - circles[k].y;
-                    val += (circles[k].r * circles[k].r) / (dx * dx + dy * dy + 1);
+        // Optimize grid calculations - only update every N frames on mobile
+        if (p.frameCount % gridUpdateFrequency === 0) {
+            // Tính toán giá trị grid từ các blob với tối ưu hóa
+            for (let i = 0; i < cols; i++) {
+                for (let j = 0; j < rows; j++) {
+                    let val = 0;
+                    for (let k = 0; k < circles.length; k++) {
+                        let dx = i * size - circles[k].x;
+                        let dy = j * size - circles[k].y;
+                        let distSq = dx * dx + dy * dy + 1;
+                        // Skip distant calculations for performance
+                        if (distSq < 10000) { // Only calculate if reasonably close
+                            val += (circles[k].r * circles[k].r) / distSq;
+                        }
+                    }
+                    grid[i][j] = val;
                 }
-                grid[i][j] = val;
             }
         }
         
@@ -164,62 +207,99 @@ const sketch1 = (p) => {
             c.move();
         }
         
-        // Tính toán contour với Marching Squares
-        pixelPixels = [];
-        let pixelDens = 8;
-        for (let i = 0; i < cols - 1; i++) {
-            for (let j = 0; j < rows - 1; j++) {
-                let a = grid[i][j] >= 1 ? 1 : 0;
-                let b = grid[i + 1][j] >= 1 ? 1 : 0;
-                let c = grid[i + 1][j + 1] >= 1 ? 1 : 0;
-                let d = grid[i][j + 1] >= 1 ? 1 : 0;
-                let config = 8 * a + 4 * b + 2 * c + 1 * d;
-                if (config === 0) continue;
-                let x = i * size;
-                let y = j * size;
-                let pt1 = p.createVector(p.lerp(x, x + size, getInterp(grid[i][j], grid[i + 1][j])), y);
-                let pt2 = p.createVector(x + size, p.lerp(y, y + size, getInterp(grid[i + 1][j], grid[i + 1][j + 1])));
-                let pt3 = p.createVector(p.lerp(x, x + size, getInterp(grid[i][j + 1], grid[i + 1][j + 1])), y + size);
-                let pt4 = p.createVector(x, p.lerp(y, y + size, getInterp(grid[i][j], grid[i][j + 1])));
-                switch (config) {
-                    case 1: addPixelsAlongLine(pt3, pt4, pixelDens); break;
-                    case 2: addPixelsAlongLine(pt2, pt3, pixelDens); break;
-                    case 3: addPixelsAlongLine(pt2, pt4, pixelDens); break;
-                    case 4: addPixelsAlongLine(pt1, pt2, pixelDens); break;
-                    case 5: addPixelsAlongLine(pt1, pt4, pixelDens); addPixelsAlongLine(pt2, pt3, pixelDens); break;
-                    case 6: addPixelsAlongLine(pt1, pt3, pixelDens); break;
-                    case 7: addPixelsAlongLine(pt1, pt4, pixelDens); break;
-                    case 8: addPixelsAlongLine(pt1, pt4, pixelDens); break;
-                    case 9: addPixelsAlongLine(pt1, pt3, pixelDens); break;
-                    case 10: addPixelsAlongLine(pt1, pt2, pixelDens); addPixelsAlongLine(pt3, pt4, pixelDens); break;
-                    case 11: addPixelsAlongLine(pt1, pt2, pixelDens); break;
-                    case 12: addPixelsAlongLine(pt2, pt4, pixelDens); break;
-                    case 13: addPixelsAlongLine(pt2, pt3, pixelDens); break;
-                    case 14: addPixelsAlongLine(pt3, pt4, pixelDens); break;
-                }
-            }
+        // Tính toán contour với Marching Squares (with caching for mobile)
+        let shouldUpdateContour = true;
+        if (isMobile) {
+            // Only update contour every few frames on mobile
+            shouldUpdateContour = (p.frameCount - lastContourUpdate) >= 3;
         }
         
-        // Vẽ hiệu ứng hạt đỏ dọc theo contour
+        if (shouldUpdateContour || contourCache.length === 0) {
+            pixelPixels = [];
+            let pixelDens = isMobile ? 4 : 8; // Reduce density on mobile
+            lastContourUpdate = p.frameCount;
+            
+            for (let i = 0; i < cols - 1; i++) {
+                for (let j = 0; j < rows - 1; j++) {
+                    let a = grid[i][j] >= 1 ? 1 : 0;
+                    let b = grid[i + 1][j] >= 1 ? 1 : 0;
+                    let c = grid[i + 1][j + 1] >= 1 ? 1 : 0;
+                    let d = grid[i][j + 1] >= 1 ? 1 : 0;
+                    let config = 8 * a + 4 * b + 2 * c + 1 * d;
+                    if (config === 0) continue;
+                    let x = i * size;
+                    let y = j * size;
+                    let pt1 = p.createVector(p.lerp(x, x + size, getInterp(grid[i][j], grid[i + 1][j])), y);
+                    let pt2 = p.createVector(x + size, p.lerp(y, y + size, getInterp(grid[i + 1][j], grid[i + 1][j + 1])));
+                    let pt3 = p.createVector(p.lerp(x, x + size, getInterp(grid[i][j + 1], grid[i + 1][j + 1])), y + size);
+                    let pt4 = p.createVector(x, p.lerp(y, y + size, getInterp(grid[i][j], grid[i][j + 1])));
+                    switch (config) {
+                        case 1: addPixelsAlongLine(pt3, pt4, pixelDens); break;
+                        case 2: addPixelsAlongLine(pt2, pt3, pixelDens); break;
+                        case 3: addPixelsAlongLine(pt2, pt4, pixelDens); break;
+                        case 4: addPixelsAlongLine(pt1, pt2, pixelDens); break;
+                        case 5: addPixelsAlongLine(pt1, pt4, pixelDens); addPixelsAlongLine(pt2, pt3, pixelDens); break;
+                        case 6: addPixelsAlongLine(pt1, pt3, pixelDens); break;
+                        case 7: addPixelsAlongLine(pt1, pt4, pixelDens); break;
+                        case 8: addPixelsAlongLine(pt1, pt4, pixelDens); break;
+                        case 9: addPixelsAlongLine(pt1, pt3, pixelDens); break;
+                        case 10: addPixelsAlongLine(pt1, pt2, pixelDens); addPixelsAlongLine(pt3, pt4, pixelDens); break;
+                        case 11: addPixelsAlongLine(pt1, pt2, pixelDens); break;
+                        case 12: addPixelsAlongLine(pt2, pt4, pixelDens); break;
+                        case 13: addPixelsAlongLine(pt2, pt3, pixelDens); break;
+                        case 14: addPixelsAlongLine(pt3, pt4, pixelDens); break;
+                    }
+                }
+            }
+            // Cache the contour for mobile
+            if (isMobile) {
+                contourCache = [...pixelPixels];
+            }
+        } else {
+            // Use cached contour on mobile
+            pixelPixels = contourCache;
+        }
+        
+        // Vẽ hiệu ứng hạt đỏ dọc theo contour với tối ưu hóa
         p.noStroke();
         p.fill("#EB0000");
-        let runLength = 500;
+        let runLength = Math.floor(500 * particleReductionFactor);
         let contourSpeed = 1.5;
+        let particlesPerPoint = Math.floor(8 * particleReductionFactor);
+        
         // spreadRadius is now defined in recomputeLayout()
         let startIdx = (p.frameCount * contourSpeed) % pixelPixels.length;
+        
+        // Use batch drawing for better performance
+        let particlesToDraw = [];
+        
         for (let i = 0; i < runLength; i++) {
             let idx = (p.floor(startIdx) + i) % pixelPixels.length;
             let point = pixelPixels[idx];
             if (point) {
-                p.rect(p.floor(point.x / 20) * 20, p.floor(point.y / 20) * 20, 20, 20);
-                for (let j = 0; j < 8; j++) {
+                // Add main point
+                particlesToDraw.push({
+                    x: p.floor(point.x / 20) * 20, 
+                    y: p.floor(point.y / 20) * 20
+                });
+                
+                // Add spread particles with reduced count
+                for (let j = 0; j < particlesPerPoint; j++) {
                     let angle = p.random(p.TWO_PI);
                     let radius = p.random(1, spreadRadius);
                     let x = point.x + p.cos(angle) * radius;
                     let y = point.y + p.sin(angle) * radius;
-                    p.rect(p.floor(x / 20) * 20, p.floor(y / 20) * 20, 20, 20);
+                    particlesToDraw.push({
+                        x: p.floor(x / 20) * 20, 
+                        y: p.floor(y / 20) * 20
+                    });
                 }
             }
+        }
+        
+        // Draw all particles in one go
+        for (let particle of particlesToDraw) {
+            p.rect(particle.x, particle.y, 20, 20);
         }
         
         // Vẽ contour chính
@@ -273,6 +353,11 @@ const sketch1 = (p) => {
         }
 
         drawQuote();
+        
+        // Performance monitoring for debugging (remove in production)
+        if (isMobile && p.frameCount % 60 === 0) {
+            console.log(`FPS: ${p.frameRate().toFixed(1)}, Circles: ${circles.length}, Grid: ${cols}x${rows}`);
+        }
     };
     
     p.mousePressed = function() {
@@ -418,26 +503,41 @@ const sketch1 = (p) => {
     }
 
     class Circle {
-        constructor() { this.reset(); }
+        constructor() { 
+            this.reset(); 
+            // Pre-calculate noise offset increment for performance
+            this.noiseIncrement = 0.01;
+        }
         reset() {
             this.x = p.random(p.width);
             this.y = p.height + p.random(60, 120);
-            // Responsive circle size - keep exact desktop proportions, just scale with screen
-            let baseRadius = 50 * scaleUI; // Always use exact desktop proportions
-            baseRadius = Math.max(20, Math.min(baseRadius, 70)); // Keep reasonable bounds
-            this.r = p.random(baseRadius, baseRadius + 20);
-            this.v = p.random(6, 10);
+            // Responsive circle size with mobile optimization
+            let baseRadius = isMobile ? 40 * scaleUI : 50 * scaleUI;
+            baseRadius = Math.max(15, Math.min(baseRadius, isMobile ? 50 : 70));
+            this.r = p.random(baseRadius, baseRadius + (isMobile ? 15 : 20));
+            this.v = p.random(isMobile ? 4 : 6, isMobile ? 8 : 10); // Slower on mobile for smoother performance
             this.offset = p.random(1000);
         }
         move() {
             this.y -= this.v;
-            let n = p.noise(this.offset + p.frameCount * 0.01);
-            this.x += p.map(n, 0, 1, -0.7, 0.7);
+            // Reduce noise calculation frequency on mobile
+            if (isMobile && p.frameCount % 2 === 0) {
+                let n = p.noise(this.offset + p.frameCount * this.noiseIncrement);
+                this.x += p.map(n, 0, 1, -0.5, 0.5); // Reduced movement for mobile
+            } else if (!isMobile) {
+                let n = p.noise(this.offset + p.frameCount * this.noiseIncrement);
+                this.x += p.map(n, 0, 1, -0.7, 0.7);
+            }
             if (this.y + this.r < 0) this.reset();
         }
     }
 
     function drawQuote() {
+        // Reduce text rendering frequency on mobile for better performance
+        if (isMobile && p.frameCount % 3 !== 0) {
+            return; // Skip text rendering on 2 out of 3 frames on mobile
+        }
+        
         p.noStroke();
         let textCol = bgColor.levels[0] === 255 ? p.color(0) : p.color(255);
         p.fill(textCol);
