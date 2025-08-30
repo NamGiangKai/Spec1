@@ -4,13 +4,16 @@
     <!-- Tải thư viện p5.js từ CDN (chỉ cần 1 lần) -->
     <script src="https://cdn.jsdelivr.net/npm/p5@1.11.8/lib/p5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.11.8/lib/addons/p5.sound.min.js"></script>
-    
+
     <!-- Performance optimization meta tags -->
-    <meta http-equiv="Page-Enter" content="blendTrans(Duration=0)">
-    <meta http-equiv="Page-Exit" content="blendTrans(Duration=0)">
+    <meta http-equiv="Page-Enter" content="blendTrans(Duration=0)" />
+    <meta http-equiv="Page-Exit" content="blendTrans(Duration=0)" />
 
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>DEKAY - Climate Change</title>
 
     <!-- Tải CSS và Fonts -->
@@ -37,12 +40,12 @@
     <header class="site-header">
       <div class="header-content">
         <div class="logo-container">
-          <img src="Logo DeKay.png" alt="DeKay Logo" class="dekay-logo">
+          <img src="Logo DeKay.png" alt="DeKay Logo" class="dekay-logo" />
         </div>
         <div class="school-info">
           <p>
-            RMIT University Vietnam, Saigon South Campus, School of Communication
-            and Design, Digital Media Program
+            RMIT University Vietnam, Saigon South Campus, School of
+            Communication and Design, Digital Media Program
           </p>
         </div>
       </div>
@@ -71,8 +74,8 @@
       <!-- Quote Section -->
       <div class="quote-container">
         <div class="quote-text">
-          "WE ARE FACING A MAN-MADE DISASTER ON A GLOBAL SCALE.<br>
-          OUR GREATEST THREAT IN THOUSANDS OF YEARS.<br>
+          "WE ARE FACING A MAN-MADE DISASTER ON A GLOBAL SCALE.<br />
+          OUR GREATEST THREAT IN THOUSANDS OF YEARS.<br />
           <span class="climate-change-red">CLIMATE CHANGE.</span>"
         </div>
         <div class="quote-attribution">-Sir David Attenborough</div>
@@ -95,9 +98,11 @@
             <span class="digit" id="digit2">0</span>
           </div>
         </div>
-        <h3 class="section-title">
-          TAKE URGENT ACTION TO COMBAT CLIMATE CHANGE AND ITS IMPACT
-        </h3>
+        <div class="title-container">
+          <h3 class="section-title">
+            TAKE URGENT ACTION TO COMBAT CLIMATE CHANGE AND ITS IMPACT
+          </h3>
+        </div>
         <p class="section-paragraph">
           Sir David Attenborough's statement that "We are facing a man-made
           disaster on a global scale. Our greatest threat in thousands of years.
@@ -121,14 +126,14 @@
         <div id="p5-canvas-container"></div>
         <div class="artwork-overlay">
           <p class="artwork-description">
-            "The Spread" is a generative art piece that depicts industrial smoke, 
-            with red pixel clusters growing along its edges and on the ground.
-             These red pixels symbolize a destructive virus, representing the
-              widespread damage of pollution. As the smoke drifts, the red patches
-               on the earth grow larger, reflecting the pollution's impact on the 
-               ecosystem. The project visualizes the visible effects of pollution
-                while reminding us of the serious threat of climate change,
-                 encouraging viewers to take action.
+            "The Spread" is a generative art piece that depicts industrial
+            smoke, with red pixel clusters growing along its edges and on the
+            ground. These red pixels symbolize a destructive virus, representing
+            the widespread damage of pollution. As the smoke drifts, the red
+            patches on the earth grow larger, reflecting the pollution's impact
+            on the ecosystem. The project visualizes the visible effects of
+            pollution while reminding us of the serious threat of climate
+            change, encouraging viewers to take action.
           </p>
           <div class="artwork-title">
             <span class="title-line-1">act I: The</span>
@@ -144,16 +149,16 @@
         <div id="p5-centipede-canvas"></div>
         <div class="artwork-overlay">
           <p class="artwork-description">
-           "The Pillar" is a generative artwork with the central image is 
-           factory smokestacks, rising like “pillars” of pollution, symbolizing
-            the devastating impact of industrialization on the environment. 
-            Behind is “heartbeat of the Earth”, representing the fragile and 
-            endangered life of the planet. The “skeletal centipede” represents
-             humanity, relentlessly crawling over a fragile world in its mechanical
-              pursuit of profit. The project not only visually depicts the problem
-               of environmental pollution, but also conveys a strong message about 
-               the urgency of combating climate change and the serious consequences
-                it brings.
+            "The Pillar" is a generative artwork with the central image is
+            factory smokestacks, rising like "pillars" of pollution, symbolizing
+            the devastating impact of industrialization on the environment.
+            Behind is "heartbeat of the Earth", representing the fragile and
+            endangered life of the planet. The "skeletal centipede" represents
+            humanity, relentlessly crawling over a fragile world in its
+            mechanical pursuit of profit. The project not only visually depicts
+            the problem of environmental pollution, but also conveys a strong
+            message about the urgency of combating climate change and the
+            serious consequences it brings.
           </p>
           <div class="artwork-title">
             <span class="title-line-1">act II: The</span>
@@ -168,7 +173,17 @@
         <div id="p5-dekay-canvas"></div>
         <div class="artwork-overlay">
           <p class="artwork-description">
-            “The Factory”  visualizing the vital problem of climate change, with the gas mask as a key visual elements, eyes replaced by mechanical gears spinning, the generative mini-gears and mechanical pipeline system running in the background; it symbolizes the industrial factory manufacturing progress that releasing wasted fumes into the air as blocks of smoke coming from the bottom. The idea is to represents the paradox of human: building infrastructures to enhance our living environment while poisoning it at the same time. We do not need a mask as a shield, as a cover or an escape; we need to value our breath with a solution from the root of every conscious decision.
+            "The Factory" visualizing the vital problem of climate change, with
+            the gas mask as a key visual elements, eyes replaced by mechanical
+            gears spinning, the generative mini-gears and mechanical pipeline
+            system running in the background; it symbolizes the industrial
+            factory manufacturing progress that releasing wasted fumes into the
+            air as blocks of smoke coming from the bottom. The idea is to
+            represents the paradox of human: building infrastructures to enhance
+            our living environment while poisoning it at the same time. We do
+            not need a mask as a shield, as a cover or an escape; we need to
+            value our breath with a solution from the root of every conscious
+            decision.
           </p>
           <div class="artwork-title">
             <span class="title-line-1">act III: The</span>
@@ -231,15 +246,13 @@
 
     <!-- Tải các file sketch -->
     <script src="sketch1.js"></script>
-     <script src="sound1.js"></script>
-     <script src="sound2.js"></script>
+    <script src="sound1.js"></script>
+    <script src="sound2.js"></script>
     <script src="sketch2.js"></script>
     <script src="sketch3.js"></script>
-    
+
     <!-- Performance monitoring -->
     <script src="performance-monitor.js"></script>
-    
-
 
     <!-- Khởi tạo các sketch p5.js -->
     <!-- Note: sketch2 is already initialized in sketch2.js -->
