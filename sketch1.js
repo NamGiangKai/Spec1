@@ -61,30 +61,29 @@ const sketch1 = (p) => {
         spreadRadius = 30 * scaleUI; // Always use exact desktop proportions
         spreadRadius = Math.max(15, Math.min(spreadRadius, 40)); // Keep reasonable bounds
         
-        console.log(`🎯 Layout updated: ${p.width}x${p.height}, Device: ${isMobile ? 'Mobile' : isTablet ? 'Tablet' : 'Desktop'}, Scale: ${scaleUI.toFixed(2)}, Size: ${size.toFixed(1)}, Num: ${num}, AreaRatio: ${areaRatio.toFixed(2)}`);
+
     }
 
 
     p.setup = () => {
         let canvasContainer = p.select('#p5-canvas-container');
-        console.log("🔍 Canvas container:", canvasContainer);
-        console.log("🔍 Container dimensions:", canvasContainer.width, "x", canvasContainer.height);
+
         
         let canvas = p.createCanvas(canvasContainer.width, canvasContainer.height);
         canvas.parent('p5-canvas-container');
         
-        console.log("🔍 Canvas created:", p.width, "x", p.height);
+
 
         // Giữ lại các cơ chế tải an toàn và gỡ lỗi của bạn
         loadSoundSafely();
 
         p.loadImage("mute.png", (img) => {
             muteIcon = img;
-            console.log("✅ Mute icon loaded");
+
         });
         p.loadImage("unmute.png", (img) => {
             unmuteIcon = img;
-            console.log("✅ Unmute icon loaded");
+
         });
 
         if (p.random() > 0.5) {
@@ -119,10 +118,7 @@ const sketch1 = (p) => {
 
     p.windowResized = () => {
         let canvasContainer = p.select('#p5-canvas-container');
-        console.log("🔄 Window resized - Container:", canvasContainer.width, "x", canvasContainer.height);
-        
         p.resizeCanvas(canvasContainer.width, canvasContainer.height);
-        console.log("🔄 Canvas resized to:", p.width, "x", p.height);
         
         // compute responsive layout
         recomputeLayout();
@@ -288,9 +284,9 @@ const sketch1 = (p) => {
                 isMuted = false; // Bỏ tắt tiếng
                 sound.setVolume(1);
                 soundHasStarted = true; // Đánh dấu là âm thanh đã bắt đầu
-                console.log("✅ Sound started successfully on first click!");
+
             } else {
-                console.log("⚠️ Sound not loaded yet. Click again when loaded.");
+
             }
         }
         // Các lần nhấn chuột SAU ĐÓ chỉ để BẬT/TẮT tiếng khi nhấn vào icon
@@ -304,7 +300,7 @@ const sketch1 = (p) => {
                 isMuted = !isMuted; // Đảo ngược trạng thái
                 if (sound && sound.isLoaded()) {
                     sound.setVolume(isMuted ? 0 : 1);
-                    console.log(`Mute toggled. New state: ${isMuted}`);
+
                 }
             }
         }
@@ -334,19 +330,19 @@ const sketch1 = (p) => {
     };
     
     function loadSoundSafely() {
-        console.log("🔊 Starting safe sound loading...");
+
         fetch('maybe.wav', { method: 'HEAD' })
             .then(response => {
                 if (response.ok) {
-                    console.log("✅ File exists, attempting to load with p5.sound...");
+
                     loadWithP5Sound();
                 } else {
-                    console.log("❌ File not found, trying HTML5 Audio...");
+
                     loadWithHTML5Audio();
                 }
             })
             .catch(error => {
-                console.log("❌ Fetch failed, trying HTML5 Audio...", error);
+
                 loadWithHTML5Audio();
             });
     }
@@ -356,26 +352,25 @@ const sketch1 = (p) => {
             p.loadSound('maybe.wav',
                 (loadedSound) => {
                     sound = loadedSound;
-                    console.log("✅ p5.sound loaded successfully:", sound);
+
                 },
                 (error) => {
-                    console.error("❌ p5.sound failed:", error);
-                    console.log("Falling back to HTML5 Audio...");
+
                     loadWithHTML5Audio();
                 }
             );
         } catch (error) {
-            console.error("❌ p5.sound error:", error);
+
             loadWithHTML5Audio();
         }
     }
 
     function loadWithHTML5Audio() {
         try {
-            console.log("🎵 Creating HTML5 Audio element...");
+
             let html5Audio = new Audio();
             html5Audio.addEventListener('canplaythrough', () => {
-                console.log("✅ HTML5 Audio loaded successfully");
+
                 sound = {
                     isLoaded: () => true,
                     isPlaying: () => !html5Audio.paused,
@@ -386,22 +381,22 @@ const sketch1 = (p) => {
                 };
             });
             html5Audio.addEventListener('error', (e) => {
-                console.error("❌ HTML5 Audio error:", e);
+
                 createSilentSound();
             });
             html5Audio.src = 'maybe.wav';
         } catch (error) {
-            console.error("❌ HTML5 Audio creation failed:", error);
+
             createSilentSound();
         }
     }
 
     function createSilentSound() {
-        console.log("🔇 Creating silent sound object as fallback...");
+
         sound = {
             isLoaded: () => true,
             isPlaying: () => false,
-            loop: () => console.log("🔇 Silent sound - no audio"),
+            loop: () => {},
             stop: () => {},
             setVolume: () => {},
             play: () => {}
@@ -459,7 +454,7 @@ const sketch1 = (p) => {
             // Ensure text doesn't go off screen
             if (x < 20) x = 20;
             
-            console.log("📱 Mobile layout - Canvas:", p.width, "x", p.height, "Text:", x, y, maxWidth);
+
         } else if (isTablet) {
             // Tablet layout - right side but smaller
             maxWidth = p.width * 0.4;
@@ -518,7 +513,7 @@ const sketch1 = (p) => {
         // Check if text fits within maxWidth, if not, reduce it
         let actualTextWidth = p.textWidth(callToAction);
         if (actualTextWidth > maxWidth) {
-            console.log("⚠️ Text too wide! Actual:", actualTextWidth, "Max:", maxWidth);
+
             // Try to fit the text by reducing maxWidth
             maxWidth = Math.min(maxWidth, actualTextWidth + 20); // Add some padding
         }
@@ -526,8 +521,7 @@ const sketch1 = (p) => {
         p.text(callToAction, ctaX, ctaY, maxWidth);
         
         if (isMobile) {
-            console.log("📱 Text positions - Quote:", x, y, "Author:", authorX, authorY, "CTA:", ctaX, ctaY);
-            console.log("📱 Text width check - CTA width:", actualTextWidth, "Max width:", maxWidth);
+
         }
         
 
