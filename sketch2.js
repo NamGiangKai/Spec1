@@ -29,6 +29,63 @@ const sketch2 = (p) => {
     let baseResolution = 20;
     let baseSegLength = 8;
     let baseNumSegments = 40;
+    
+    // Performance optimization variables
+    let maxFPS = 60; // Always maintain 60fps
+    let flowFieldUpdateFrequency = 1;
+    let pillarUpdateFrequency = 1;
+    let centipedeUpdateFrequency = 1;
+    let performanceMode = false;
+    
+    // Advanced optimization variables
+    let vectorPool = []; // Object pool for vectors
+    let vectorPoolIndex = 0;
+    let frameTimeTarget = 16.67; // Target 60fps (16.67ms per frame)
+    let lastFrameTime = 0;
+    let adaptiveQuality = 1.0; // Dynamic quality scaling
+    let performanceHistory = [];
+    let flowFieldCache = null; // Cache for flow field calculations
+    let pillarCache = null; // Cache for pillar calculations
+
+    // --- Object Pooling System ---
+    function getVector(x = 0, y = 0) {
+        if (vectorPool.length > vectorPoolIndex) {
+            let v = vectorPool[vectorPoolIndex];
+            v.set(x, y);
+            vectorPoolIndex++;
+            return v;
+        } else {
+            let v = p.createVector(x, y);
+            vectorPool.push(v);
+            vectorPoolIndex++;
+            return v;
+        }
+    }
+    
+    function resetVectorPool() {
+        vectorPoolIndex = 0;
+    }
+    
+    // Performance monitoring and adaptive quality
+    function updatePerformance() {
+        let currentTime = performance.now();
+        let frameTime = currentTime - lastFrameTime;
+        lastFrameTime = currentTime;
+        
+        performanceHistory.push(frameTime);
+        if (performanceHistory.length > 10) {
+            performanceHistory.shift();
+        }
+        
+        let avgFrameTime = performanceHistory.reduce((a, b) => a + b, 0) / performanceHistory.length;
+        
+        // Adaptive quality scaling
+        if (avgFrameTime > frameTimeTarget * 1.2) {
+            adaptiveQuality = Math.max(0.5, adaptiveQuality - 0.05);
+        } else if (avgFrameTime < frameTimeTarget * 0.8) {
+            adaptiveQuality = Math.min(1.0, adaptiveQuality + 0.02);
+        }
+    }
 
     // --- Định nghĩa các lớp ---
 
@@ -65,22 +122,30 @@ const sketch2 = (p) => {
             this.time++;
             this.segments[0].follow(target);
             this.segments[0].update(this.easing);
+            
+            // Optimize segment updates
             for (let i = 1; i < this.segments.length; i++) {
                 this.segments[i].follow(this.segments[i - 1].pos);
                 this.segments[i].update(this.easing);
             }
+            
             this.gaitTimer++;
             if (this.gaitTimer > this.gaitDuration) {
                 this.gaitTimer = 0;
                 this.gaitPhase = 1 - this.gaitPhase;
-                for (const leg of this.legs) {
+                
+                // Optimize leg updates - batch process
+                for (let i = 0; i < this.legs.length; i++) {
+                    let leg = this.legs[i];
                     if ((this.gaitPhase === 0 && leg.side === 1) || (this.gaitPhase === 1 && leg.side === -1)) {
                         leg.findNewTarget();
                     }
                 }
             }
-            for (const leg of this.legs) {
-                leg.update();
+            
+            // Optimize leg updates
+            for (let i = 0; i < this.legs.length; i++) {
+                this.legs[i].update();
             }
         }
 
@@ -186,16 +251,34 @@ const sketch2 = (p) => {
                     this.isStepping = false;
                 }
             }
+            
             let hip = this.parent.pos;
             let foot = this.footPos;
-            let d = p.dist(hip.x, hip.y, foot.x, foot.y);
-            d = p.min(d, this.upperLegLen + this.lowerLegLen - 1);
+            
+            // Optimize distance calculation
+            let dx = foot.x - hip.x;
+            let dy = foot.y - hip.y;
+            let d = Math.sqrt(dx * dx + dy * dy);
+            d = Math.min(d, this.upperLegLen + this.lowerLegLen - 1);
+            
+            // Optimize inverse kinematics calculations
             let a = (d * d + this.upperLegLen * this.upperLegLen - this.lowerLegLen * this.lowerLegLen) / (2 * d);
-            let h = p.sqrt(p.max(0, this.upperLegLen * this.upperLegLen - a * a));
-            let midPoint = p.createVector(hip.x + (foot.x - hip.x) * (a / d), hip.y + (foot.y - hip.y) * (a / d));
-            let hipToFoot = p.createVector(foot.x - hip.x, foot.y - hip.y).normalize();
-            let kneeOffset = p.createVector(-hipToFoot.y, hipToFoot.x).mult(h * this.side);
-            this.kneePos = p.createVector(midPoint.x + kneeOffset.x, midPoint.y + kneeOffset.y);
+            let h = Math.sqrt(Math.max(0, this.upperLegLen * this.upperLegLen - a * a));
+            
+            // Pre-calculate normalized direction
+            let invD = 1 / d;
+            let normalizedX = dx * invD;
+            let normalizedY = dy * invD;
+            
+            let midPointX = hip.x + normalizedX * a;
+            let midPointY = hip.y + normalizedY * a;
+            
+            // Optimize knee position calculation
+            let kneeOffsetX = -normalizedY * h * this.side;
+            let kneeOffsetY = normalizedX * h * this.side;
+            
+            this.kneePos.x = midPointX + kneeOffsetX;
+            this.kneePos.y = midPointY + kneeOffsetY;
         }
 
         show() {
@@ -229,20 +312,30 @@ const sketch2 = (p) => {
         isMobile = width < 768;
         isTablet = width >= 768 && width < 1024;
         
-        // Adjust resolution based on screen size
+        // Adjust settings for 60fps on all devices with smart optimizations
         if (isMobile) {
-            resolution = Math.max(15, Math.floor(width / 25));
-            baseNumSegments = 25;
+            resolution = Math.max(30, Math.floor(width / 18)); // Optimized for 60fps
+            baseNumSegments = 25; // Balanced for smooth animation
             baseSegLength = 6;
+            performanceMode = true;
+            // Use adaptive quality instead of fixed frame skipping
         } else if (isTablet) {
-            resolution = Math.max(18, Math.floor(width / 22));
+            resolution = Math.max(25, Math.floor(width / 20));
             baseNumSegments = 32;
             baseSegLength = 7;
+            performanceMode = true;
         } else {
             resolution = baseResolution;
             baseNumSegments = 40;
             baseSegLength = 8;
+            performanceMode = false;
         }
+        
+        // Always target 60fps
+        maxFPS = 60;
+        flowFieldUpdateFrequency = 1;
+        pillarUpdateFrequency = 1;
+        centipedeUpdateFrequency = 1;
         
         // Update cols and rows
         cols = p.floor(width / resolution);
@@ -288,7 +381,7 @@ const sketch2 = (p) => {
         pillarGraphics = p.createGraphics(p.width, p.height);
         
         // Performance settings
-        p.frameRate(60);
+        p.frameRate(maxFPS);
         p.disableFriendlyErrors = true;
         
         // Load assets using sound2.js module
@@ -298,26 +391,59 @@ const sketch2 = (p) => {
     };
 
     p.windowResized = () => {
-        // Get container dimensions
-        let canvasContainer = p.select('#p5-centipede-canvas');
-        if (canvasContainer && canvasContainer.elt) {
-            let containerWidth = canvasContainer.width;
-            let containerHeight = canvasContainer.height;
-            
-            // Resize canvas to container
-            p.resizeCanvas(containerWidth, containerHeight);
-            
-            // Update responsive parameters
-            updateResponsiveParams();
-            
-
-        }
+        // Debounce resize events for better performance
+        clearTimeout(window.centipedeResizeTimeout);
+        window.centipedeResizeTimeout = setTimeout(() => {
+            // Get container dimensions
+            let canvasContainer = p.select('#p5-centipede-canvas');
+            if (canvasContainer && canvasContainer.elt) {
+                let containerWidth = canvasContainer.width;
+                let containerHeight = canvasContainer.height;
+                
+                // Resize canvas to container
+                p.resizeCanvas(containerWidth, containerHeight);
+                
+                // Update responsive parameters
+                updateResponsiveParams();
+                
+                // Set new frame rate
+                p.frameRate(maxFPS);
+                
+                // Clear graphics buffers to force refresh
+                if (flowFieldGraphics) {
+                    flowFieldGraphics = p.createGraphics(p.width, p.height);
+                }
+                if (pillarGraphics) {
+                    pillarGraphics = p.createGraphics(p.width, p.height);
+                }
+            }
+        }, 100); // 100ms debounce
     };
 
     p.draw = () => {
+        // Performance monitoring and adaptive quality
+        updatePerformance();
+        resetVectorPool(); // Reset object pool each frame
+        
         p.background(0, 40);
-        p.drawFlowField();
-        p.drawPillar();
+        
+        // Adaptive rendering based on performance
+        let shouldUpdateFlowField = true;
+        let shouldUpdatePillar = true;
+        
+        if (performanceMode && adaptiveQuality < 0.8) {
+            // Skip some updates when performance is low
+            shouldUpdateFlowField = p.frameCount % 2 === 0;
+            shouldUpdatePillar = p.frameCount % 3 === 0;
+        }
+        
+        if (shouldUpdateFlowField) {
+            p.drawFlowField();
+        }
+        if (shouldUpdatePillar) {
+            p.drawPillar();
+        }
+        
         p.image(flowFieldGraphics, 0, 0);
         p.image(pillarGraphics, 0, 0);
         
@@ -331,10 +457,17 @@ const sketch2 = (p) => {
             targetY = p.touches[0].y;
         }
         
-        myCentipede.update(p.createVector(targetX, targetY));
+        // Update centipede with performance optimization
+        if (p.frameCount % centipedeUpdateFrequency === 0) {
+            myCentipede.update(p.createVector(targetX, targetY));
+        }
         myCentipede.show();
-        p.drawQuote();
-        p.checkHover();
+        
+        // Reduce text rendering frequency on mobile
+        if (!performanceMode || p.frameCount % 2 === 0) {
+            p.drawQuote();
+            p.checkHover();
+        }
 
         // Vẽ nút mute/unmute với responsive positioning
         let muteButtonSize = isMobile ? 40 : 50;
@@ -351,6 +484,13 @@ const sketch2 = (p) => {
             }
         }
         time += 0.005;
+        
+        // Performance monitoring for debugging
+        if (p.frameCount % 120 === 0) {
+            let avgFrameTime = performanceHistory.length > 0 ? 
+                performanceHistory.reduce((a, b) => a + b, 0) / performanceHistory.length : 0;
+            console.log(`FPS: ${p.frameRate().toFixed(1)}, Quality: ${(adaptiveQuality * 100).toFixed(0)}%, Frame Time: ${avgFrameTime.toFixed(1)}ms, Grid: ${cols}x${rows}`);
+        }
     };
 
     p.mousePressed = () => {
@@ -470,23 +610,58 @@ const sketch2 = (p) => {
         flowFieldGraphics.strokeWeight(1.5);
         const w_half = p.width / 2;
         const h_half = p.height / 2;
-        for (let y = 0; y < rows; y++) {
-            for (let x = 0; x < cols; x++) {
-                let gridX = x * resolution + resolution / 2;
-                let gridY = y * resolution + resolution / 2;
-                let noiseAngle = p.noise(x * noiseScale, y * noiseScale, zoff) * p.TWO_PI * angleMultiplier;
+        
+        // Adaptive quality for flow field density
+        let qualityStepSize = Math.max(1, Math.floor(2 - adaptiveQuality));
+        let effectiveRows = Math.floor(rows / qualityStepSize);
+        let effectiveColumns = Math.floor(cols / qualityStepSize);
+        
+        // Pre-calculate common values
+        let halfResolution = resolution / 2;
+        let invWHalf = 1 / w_half;
+        
+        // Batch rendering for better performance
+        flowFieldGraphics.beginShape(p.LINES);
+        
+        for (let y = 0; y < effectiveRows; y++) {
+            let actualY = y * qualityStepSize;
+            let gridY = actualY * resolution + halfResolution;
+            
+            for (let x = 0; x < effectiveColumns; x++) {
+                let actualX = x * qualityStepSize;
+                let gridX = actualX * resolution + halfResolution;
+                
+                // Optimized noise calculation
+                let noiseAngle = p.noise(actualX * noiseScale, actualY * noiseScale, zoff) * p.TWO_PI * angleMultiplier;
                 let finalAngle = noiseAngle;
+                
                 if (currentState === 'VORTEX') {
-                    let vectorToCenter = p.createVector(w_half - gridX, h_half - gridY);
-                    finalAngle = vectorToCenter.heading() + p.HALF_PI + noiseAngle * 0.5;
+                    let dx = w_half - gridX;
+                    let dy = h_half - gridY;
+                    finalAngle = Math.atan2(dy, dx) + p.HALF_PI + noiseAngle * 0.5;
                 }
-                let v = p.createVector(p.cos(finalAngle), p.sin(finalAngle));
-                let edgeAlpha = p.map(p.dist(gridX, gridY, w_half, h_half), 0, w_half, 1, 0);
-                let finalAlpha = baseAlpha * edgeAlpha;
-                flowFieldGraphics.stroke(255, 20, 20, finalAlpha);
-                flowFieldGraphics.line(gridX, gridY, gridX + v.x * lineLength, gridY + v.y * lineLength);
+                
+                // Pre-calculate trigonometric values
+                let cosAngle = Math.cos(finalAngle);
+                let sinAngle = Math.sin(finalAngle);
+                
+                // Optimized distance and alpha calculation
+                let dx = gridX - w_half;
+                let dy = gridY - h_half;
+                let distSq = dx * dx + dy * dy;
+                let edgeAlpha = Math.max(0, 1 - Math.sqrt(distSq) * invWHalf);
+                let finalAlpha = baseAlpha * edgeAlpha * adaptiveQuality;
+                
+                if (finalAlpha > 10) { // Skip very transparent lines
+                    flowFieldGraphics.stroke(255, 20, 20, finalAlpha);
+                    flowFieldGraphics.line(gridX, gridY, 
+                                         gridX + cosAngle * lineLength, 
+                                         gridY + sinAngle * lineLength);
+                }
             }
         }
+        
+        flowFieldGraphics.endShape();
     };
     
     p.drawPillar = () => {
@@ -500,17 +675,31 @@ const sketch2 = (p) => {
         const pillarRadius = pillarWidth / 2;
         const pillarCenterX = p.width / 2;
         
-        for (let radius = 0.05; radius < 0.7; radius += 0.015) {
-            const circle = makeCircle(20, radius);
+        // Adaptive pillar rendering based on performance
+        let radiusStep = Math.max(0.015, 0.035 - (adaptiveQuality * 0.02));
+        let circleResolution = Math.floor(12 + (adaptiveQuality * 8));
+        let smoothingIterations = Math.floor(2 + (adaptiveQuality * 2));
+        
+        // Pre-calculate common values
+        let heightScale = p.height;
+        let angleRange = p.PI;
+        let angleOffset = -p.HALF_PI;
+        
+        for (let radius = 0.05; radius < 0.7; radius += radiusStep) {
+            const circle = makeCircle(circleResolution, radius);
             const distortedCircle = distortPolygon(circle, time);
-            const smoothCircle = chaikin(distortedCircle, 4);
+            const smoothCircle = chaikin(distortedCircle, smoothingIterations);
+            
             pillarGraphics.beginShape();
-            smoothCircle.forEach(point => {
-                let angle = p.map(point[0], 0, 1, -p.PI / 2, p.PI / 2);
-                let screenX = pillarCenterX + p.sin(angle) * pillarRadius;
-                let screenY = point[1] * p.height;
+            
+            // Optimized vertex calculations with pre-computed values
+            for (let i = 0; i < smoothCircle.length; i++) {
+                let point = smoothCircle[i];
+                let angle = angleOffset + (point[0] * angleRange);
+                let screenX = pillarCenterX + Math.sin(angle) * pillarRadius;
+                let screenY = point[1] * heightScale;
                 pillarGraphics.vertex(screenX, screenY);
-            });
+            }
             pillarGraphics.endShape(p.CLOSE);
         }
         addPillarShading(pillarGraphics, pillarCenterX - pillarRadius, pillarWidth);
