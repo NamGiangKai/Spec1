@@ -294,7 +294,7 @@ const sketch2 = (p) => {
         // Load assets using sound2.js module
         loadAssets();
         
-        console.log(`🎯 Canvas created: ${p.width}x${p.height}, Device: ${isMobile ? 'Mobile' : isTablet ? 'Tablet' : 'Desktop'}`);
+
     };
 
     p.windowResized = () => {
@@ -310,7 +310,7 @@ const sketch2 = (p) => {
             // Update responsive parameters
             updateResponsiveParams();
             
-            console.log(`🔄 Canvas resized: ${p.width}x${p.height}`);
+
         }
     };
 
@@ -367,9 +367,9 @@ const sketch2 = (p) => {
                 isMuted = false; // Bỏ tắt tiếng
                 soundManager.testSound.setVolume(1);
                 soundHasStarted = true; // Đánh dấu là âm thanh đã bắt đầu
-                console.log("✅ Sound started successfully on first click!");
+
             } else {
-                console.log("⚠️ Sound not loaded yet. Click again when loaded.");
+
             }
         }
         // Các lần nhấn chuột SAU ĐÓ chỉ để BẬT/TẮT tiếng khi nhấn vào icon
@@ -379,7 +379,7 @@ const sketch2 = (p) => {
                 isMuted = !isMuted; // Đảo ngược trạng thái
                 if (soundManager && soundManager.testSound && soundManager.testSound.isLoaded()) {
                     soundManager.testSound.setVolume(isMuted ? 0 : 1);
-                    console.log(`Mute toggled. New state: ${isMuted}`);
+
                 }
             } else {
                 // Phát âm thanh click nếu không bị tắt tiếng
@@ -680,17 +680,13 @@ const sketch2 = (p) => {
         soundManager = soundModule(p);
         soundManager.loadAssets();
         
-        console.log("✅ Sound manager initialized with sound2.js module");
+
         
         // Check loading status after a delay
         setTimeout(() => {
             if (soundManager) {
                 const status = soundManager.getLoadingStatus();
-                console.log("📊 Sound Manager Status:", status);
-                
-                if (!status.assetsLoaded) {
-                    console.warn("⚠️ Some sound assets failed to load. Check console for details.");
-                }
+
             }
         }, 3000);
     }
