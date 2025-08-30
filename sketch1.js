@@ -13,11 +13,67 @@ const sketch1 = (p) => {
     let soundHasStarted = false; // Biến mới để theo dõi trạng thái bắt đầu của âm thanh
     let muteIcon, unmuteIcon;
 
+    // ---- responsive scaling ----
+    let scaleUI = 1; // relative to 1920x1080
+    
+    // Responsive variables
+    let isMobile = false;
+    let isTablet = false;
+    let baseSize = 20;
+    let baseNum = 55;
+
+    function detectDeviceType() {
+        const width = p.width;
+        const height = p.height;
+        
+        isMobile = width < 768;
+        isTablet = width >= 768 && width < 1024;
+        
+        // Adjust base values for different devices
+        if (isMobile) {
+            baseSize = 16;
+            baseNum = 40;
+        } else if (isTablet) {
+            baseSize = 18;
+            baseNum = 50;
+        } else {
+            baseSize = 20;
+            baseNum = 55;
+        }
+    }
+
+    function recomputeLayout() {
+        const baseW = 1920, baseH = 1080;
+        scaleUI = Math.min(p.width / baseW, p.height / baseH);
+        
+        detectDeviceType();
+        
+        // Responsive cell size - keep exact desktop size, just scale with screen
+        size = baseSize * scaleUI; // Always use exact desktop proportions
+        size = Math.max(8, Math.min(size, 25)); // Keep reasonable bounds
+        
+        // Responsive number of circles - keep exact desktop density, just scale with screen area
+        let areaRatio = (p.width * p.height) / (baseW * baseH);
+        num = Math.round(baseNum * areaRatio); // Always use exact desktop proportions
+        num = Math.max(20, Math.min(num, 80)); // Keep reasonable bounds
+        
+        // Responsive spread radius - keep exact desktop proportions, just scale with screen
+        spreadRadius = 30 * scaleUI; // Always use exact desktop proportions
+        spreadRadius = Math.max(15, Math.min(spreadRadius, 40)); // Keep reasonable bounds
+        
+        console.log(`🎯 Layout updated: ${p.width}x${p.height}, Device: ${isMobile ? 'Mobile' : isTablet ? 'Tablet' : 'Desktop'}, Scale: ${scaleUI.toFixed(2)}, Size: ${size.toFixed(1)}, Num: ${num}, AreaRatio: ${areaRatio.toFixed(2)}`);
+    }
+
 
     p.setup = () => {
         let canvasContainer = p.select('#p5-canvas-container');
+        console.log("🔍 Canvas container:", canvasContainer);
+        console.log("🔍 Container dimensions:", canvasContainer.width, "x", canvasContainer.height);
+        
         let canvas = p.createCanvas(canvasContainer.width, canvasContainer.height);
         canvas.parent('p5-canvas-container');
+        
+        console.log("🔍 Canvas created:", p.width, "x", p.height);
 
         // Giữ lại các cơ chế tải an toàn và gỡ lỗi của bạn
         loadSoundSafely();
@@ -39,6 +95,9 @@ const sketch1 = (p) => {
             contourColor = p.color(0);
         }
 
+        // compute responsive layout
+        recomputeLayout();
+
         // FIX: Sử dụng Math.ceil để đảm bảo đủ ô lưới
         cols = Math.ceil(p.width / size) + 1;
         rows = Math.ceil(p.height / size) + 1;
@@ -52,7 +111,6 @@ const sketch1 = (p) => {
             }
         }
 
-        num = p.int(p.random(50, 60));
         circles = [];
         for (let i = 0; i < num; i++) {
             circles.push(new Circle());
@@ -61,7 +119,13 @@ const sketch1 = (p) => {
 
     p.windowResized = () => {
         let canvasContainer = p.select('#p5-canvas-container');
+        console.log("🔄 Window resized - Container:", canvasContainer.width, "x", canvasContainer.height);
+        
         p.resizeCanvas(canvasContainer.width, canvasContainer.height);
+        console.log("🔄 Canvas resized to:", p.width, "x", p.height);
+        
+        // compute responsive layout
+        recomputeLayout();
         
         // FIX: Cập nhật lại grid với kích thước mới
         cols = Math.ceil(p.width / size) + 1;
@@ -76,9 +140,10 @@ const sketch1 = (p) => {
             }
         }
         
-        // Reset các blob
-        for (let i = 0; i < circles.length; i++) {
-            circles[i].reset();
+        // Reset các blob với số lượng mới
+        circles = [];
+        for (let i = 0; i < num; i++) {
+            circles.push(new Circle());
         }
     };
 
@@ -144,7 +209,7 @@ const sketch1 = (p) => {
         p.fill("#EB0000");
         let runLength = 500;
         let contourSpeed = 1.5;
-        let spreadRadius = 30;
+        // spreadRadius is now defined in recomputeLayout()
         let startIdx = (p.frameCount * contourSpeed) % pixelPixels.length;
         for (let i = 0; i < runLength; i++) {
             let idx = (p.floor(startIdx) + i) % pixelPixels.length;
@@ -199,10 +264,15 @@ const sketch1 = (p) => {
         
         // Vẽ icon mute/unmute
         if (muteIcon && unmuteIcon) {
+            // Responsive button sizing and positioning
+            let buttonSize = isMobile ? 40 : isTablet ? 45 : 50;
+            let buttonX = isMobile ? 20 : isTablet ? 30 : 50;
+            let buttonY = isMobile ? 20 : isTablet ? 30 : 50;
+            
             if (isMuted) {
-                p.image(muteIcon, 50, 50, 50, 50);
+                p.image(muteIcon, buttonX, buttonY, buttonSize, buttonSize);
             } else {
-                p.image(unmuteIcon, 50, 50, 50, 50);
+                p.image(unmuteIcon, buttonX, buttonY, buttonSize, buttonSize);
             }
         }
 
@@ -225,7 +295,12 @@ const sketch1 = (p) => {
         }
         // Các lần nhấn chuột SAU ĐÓ chỉ để BẬT/TẮT tiếng khi nhấn vào icon
         else {
-            if (p.mouseX > 20 && p.mouseX < 70 && p.mouseY > 20 && p.mouseY < 70) {
+            // Responsive button detection
+            let buttonSize = isMobile ? 40 : isTablet ? 45 : 50;
+            let buttonX = isMobile ? 20 : isTablet ? 30 : 50;
+            let buttonY = isMobile ? 20 : isTablet ? 30 : 50;
+            
+            if (p.mouseX > buttonX && p.mouseX < buttonX + buttonSize && p.mouseY > buttonY && p.mouseY < buttonY + buttonSize) {
                 isMuted = !isMuted; // Đảo ngược trạng thái
                 if (sound && sound.isLoaded()) {
                     sound.setVolume(isMuted ? 0 : 1);
@@ -352,7 +427,10 @@ const sketch1 = (p) => {
         reset() {
             this.x = p.random(p.width);
             this.y = p.height + p.random(60, 120);
-            this.r = p.random(30, 70);
+            // Responsive circle size - keep exact desktop proportions, just scale with screen
+            let baseRadius = 50 * scaleUI; // Always use exact desktop proportions
+            baseRadius = Math.max(20, Math.min(baseRadius, 70)); // Keep reasonable bounds
+            this.r = p.random(baseRadius, baseRadius + 20);
             this.v = p.random(6, 10);
             this.offset = p.random(1000);
         }
@@ -369,21 +447,50 @@ const sketch1 = (p) => {
         let textCol = bgColor.levels[0] === 255 ? p.color(0) : p.color(255);
         p.fill(textCol);
         
-        // Keep original position but make it responsive
-        let x = 1200; // Original position
-        let y = 80;   // Original position
-        let maxWidth = 400; // Original width
+        // Responsive positioning and sizing
+        let maxWidth, x, y;
         
-        // Adjust position when screen is too small to prevent text cutoff
-        if (p.width < 1600) {
-            x = p.width - 420; // Keep text fully visible
-            if (x < 20) x = 20; // Don't go off left edge
+        if (isMobile) {
+            // Mobile layout - keep text on right side like desktop, but responsive
+            maxWidth = p.width * 0.65; // Slightly wider for better readability
+            x = p.width - maxWidth - 20; // Right side with proper margin like desktop
+            y = p.height * 0.06; // Closer to top like desktop
+            
+            // Ensure text doesn't go off screen
+            if (x < 20) x = 20;
+            
+            console.log("📱 Mobile layout - Canvas:", p.width, "x", p.height, "Text:", x, y, maxWidth);
+        } else if (isTablet) {
+            // Tablet layout - right side but smaller
+            maxWidth = p.width * 0.4;
+            x = p.width - maxWidth - 20;
+            y = p.height * 0.08;
+        } else {
+            // Desktop layout - original positioning but responsive
+            maxWidth = 400;
+            x = p.width - maxWidth - 20; // Always keep text fully visible
+            y = 80;
+            
+            // Ensure text doesn't go off screen
+            if (x < 20) x = 20;
         }
         
         // Responsive text sizes
-        let mainTextSize = p.width > 1200 ? 17 : p.width > 800 ? 15 : 13;
-        let attributionSize = p.width > 1200 ? 12 : p.width > 800 ? 11 : 10;
-        let callToActionSize = p.width > 1200 ? 15 : p.width > 800 ? 14 : 12;
+        let mainTextSize, attributionSize, callToActionSize;
+        
+        if (isMobile) {
+            mainTextSize = 13; // Slightly smaller for mobile
+            attributionSize = 9;
+            callToActionSize = 11;
+        } else if (isTablet) {
+            mainTextSize = 16;
+            attributionSize = 11;
+            callToActionSize = 13;
+        } else {
+            mainTextSize = p.width > 1200 ? 17 : p.width > 800 ? 15 : 13;
+            attributionSize = p.width > 1200 ? 12 : p.width > 800 ? 11 : 10;
+            callToActionSize = p.width > 1200 ? 15 : p.width > 800 ? 14 : 12;
+        }
         
         let quote = '"We are facing a man-made disaster on a global scale. Our greatest threat in thousands of years. Climate change."';
         
@@ -393,20 +500,37 @@ const sketch1 = (p) => {
         p.textAlign(p.LEFT);
         p.text(quote, x, y, maxWidth);
         
+        // Responsive positioning for attribution - keep desktop-like spacing
+        let authorX = isMobile ? x + 15 : x + 20; // Mobile: slight offset like desktop
+        let authorY = isMobile ? y + 60 : y + 70; // Mobile: closer spacing
         p.textSize(attributionSize);
         p.textStyle(p.NORMAL);
-        p.text("— Sir David Attenborough", x + 20, y + 70, maxWidth);
+        p.text("— Sir David Attenborough", authorX, authorY, maxWidth);
         
+        // Responsive positioning for call to action - keep desktop-like spacing
+        let ctaX = isMobile ? x + 80 : x + 110; // Mobile: proportional offset
+        let ctaY = isMobile ? y + 140 : y + 300; // Mobile: proportional spacing
         p.textSize(callToActionSize);
         p.fill("#EB0000");
         p.textStyle(p.BOLD);
         let callToAction = "Cut the fumes, not our breath.";
-        p.text(callToAction, x + 110, y + 300, maxWidth);
         
-        // Additional safety check to prevent text cutoff
-        if (x + maxWidth > p.width - 20) {
-            maxWidth = p.width - x - 20;
+        // Check if text fits within maxWidth, if not, reduce it
+        let actualTextWidth = p.textWidth(callToAction);
+        if (actualTextWidth > maxWidth) {
+            console.log("⚠️ Text too wide! Actual:", actualTextWidth, "Max:", maxWidth);
+            // Try to fit the text by reducing maxWidth
+            maxWidth = Math.min(maxWidth, actualTextWidth + 20); // Add some padding
         }
+        
+        p.text(callToAction, ctaX, ctaY, maxWidth);
+        
+        if (isMobile) {
+            console.log("📱 Text positions - Quote:", x, y, "Author:", authorX, authorY, "CTA:", ctaX, ctaY);
+            console.log("📱 Text width check - CTA width:", actualTextWidth, "Max width:", maxWidth);
+        }
+        
+
     }
 };
 
