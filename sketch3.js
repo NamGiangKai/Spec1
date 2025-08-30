@@ -325,11 +325,24 @@ const industrialSketch = (p) => {
   p.mousePressed = () => {
     if (isOverButton(p.mouseX, p.mouseY)) toggleAudio();
   };
-  p.touchStarted = () => {
-    if (p.touches && p.touches.length > 0) {
-      const tx = p.touches[0].x, ty = p.touches[0].y;
-      if (isOverButton(tx, ty)) toggleAudio();
+  p.touchStarted = (event) => {
+    // Only handle touch if it's within canvas bounds and specifically on interactive elements
+    let canvasElement = document.getElementById('p5-dekay-canvas');
+    if (!canvasElement) return;
+    
+    let rect = canvasElement.getBoundingClientRect();
+    let touch = event.touches ? event.touches[0] : event;
+    let touchX = touch.clientX - rect.left;
+    let touchY = touch.clientY - rect.top;
+    
+    // Check if touch is on audio button - only prevent default for button interactions
+    if (isOverButton(touchX, touchY)) {
+      toggleAudio();
+      return false; // Only prevent default for button interactions
     }
+    
+    // For other touches, allow normal scrolling behavior
+    // Don't return false - allow default touch behavior for scrolling
   };
 
   p.draw = () => {
