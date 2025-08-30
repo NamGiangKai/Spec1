@@ -82,6 +82,48 @@ const industrialSketch = (p) => {
   let isTablet = false;
   let baseGearRad = 125;
   let baseGearOffset = 150;
+  
+  // Performance optimization variables
+  let maxFPS = 60; // Always maintain 60fps
+  let frameTimeTarget = 16.67; // Target 60fps
+  let lastFrameTime = 0;
+  let adaptiveQuality = 1.0;
+  let performanceHistory = [];
+  let miniGearUpdateFrequency = 1;
+  let smokeUpdateFrequency = 1;
+  let circleAnimUpdateFrequency = 1;
+
+  // Performance monitoring and adaptive quality
+  function updatePerformance() {
+    let currentTime = performance.now();
+    let frameTime = currentTime - lastFrameTime;
+    lastFrameTime = currentTime;
+    
+    performanceHistory.push(frameTime);
+    if (performanceHistory.length > 10) {
+      performanceHistory.shift();
+    }
+    
+    let avgFrameTime = performanceHistory.reduce((a, b) => a + b, 0) / performanceHistory.length;
+    
+    // Adaptive quality scaling
+    if (avgFrameTime > frameTimeTarget * 1.2) {
+      adaptiveQuality = Math.max(0.6, adaptiveQuality - 0.05);
+    } else if (avgFrameTime < frameTimeTarget * 0.8) {
+      adaptiveQuality = Math.min(1.0, adaptiveQuality + 0.02);
+    }
+    
+    // Update frequencies based on performance
+    if (isMobile && adaptiveQuality < 0.8) {
+      miniGearUpdateFrequency = 2;
+      smokeUpdateFrequency = 2;
+      circleAnimUpdateFrequency = 2;
+    } else {
+      miniGearUpdateFrequency = 1;
+      smokeUpdateFrequency = 1;
+      circleAnimUpdateFrequency = 1;
+    }
+  }
 
   function detectDeviceType() {
     const width = p.width;
@@ -90,10 +132,10 @@ const industrialSketch = (p) => {
     isMobile = width < 768;
     isTablet = width >= 768 && width < 1024;
     
-    // Adjust base values for different devices
+    // Optimize for 60fps on all devices
     if (isMobile) {
-      baseGearRad = 65;  // Giảm từ 80 xuống 65
-      baseGearOffset = 85; // Giảm từ 100 xuống 85
+      baseGearRad = 75;  // Optimized for 60fps
+      baseGearOffset = 95;
     } else if (isTablet) {
       baseGearRad = 100;
       baseGearOffset = 125;
@@ -161,9 +203,10 @@ const industrialSketch = (p) => {
     TILE = Math.round(80 * scaleUI);
     TILE = Math.max(40, Math.min(TILE, 120));
 
-    // number of mini gears scales by area
-    miniGearsTarget = Math.round(200 * scaleUI * scaleUI);
-    miniGearsTarget = Math.max(60, Math.min(miniGearsTarget, 220));
+    // Adaptive mini gears count based on performance and device
+    let baseGearCount = isMobile ? 120 : isTablet ? 160 : 200;
+    miniGearsTarget = Math.round(baseGearCount * scaleUI * scaleUI * adaptiveQuality);
+    miniGearsTarget = Math.max(40, Math.min(miniGearsTarget, 220));
     
 
   }
@@ -290,41 +333,69 @@ const industrialSketch = (p) => {
   };
 
   p.draw = () => {
+    // Performance monitoring
+    updatePerformance();
+    
     p.background(0);
 
     // ---- 0) PIPES UNDERLAY (static) ----
     p.image(pipesPG, 0, 0);
 
-    // ---- 1) mini gears background (animated) ----
-    bgPG.clear();
-    for (const g of miniGears) { g.update(); g.draw(bgPG); }
+    // ---- 1) mini gears background (animated with adaptive updates) ----
+    if (p.frameCount % miniGearUpdateFrequency === 0) {
+      bgPG.clear();
+      // Adaptive mini gear rendering
+      let gearStep = Math.max(1, Math.floor(2 - adaptiveQuality));
+      for (let i = 0; i < miniGears.length; i += gearStep) {
+        miniGears[i].update(); 
+        miniGears[i].draw(bgPG);
+      }
+    }
     p.image(bgPG, 0, 0);
 
-    // ---- 2) smoke: vertical, random bottom starts, random lifetime 3–7s ----
-    if (p.frameCount % 1 === 0) {
-      const randX = Math.round(p.random(p.width * 0.02, p.width * 0.98) / GRID) * GRID;
-      emitSmoke(randX, p.height - 2, 3, 1.0, 2.0, 20, 30);
-      if (p.random() < 0.15) {
-        const randX2 = Math.round(p.random(p.width * 0.02, p.width * 0.98) / GRID) * GRID;
-        emitSmoke(randX2, p.height - 2, 2, 0.8, 1.6, 14, 24);
+    // ---- 2) adaptive smoke system ----
+    if (p.frameCount % smokeUpdateFrequency === 0) {
+      // Reduce smoke emission based on performance
+      let smokeIntensity = adaptiveQuality;
+      let smokeCount = Math.floor(3 * smokeIntensity);
+      
+      if (smokeCount > 0) {
+        const randX = Math.round(p.random(p.width * 0.02, p.width * 0.98) / GRID) * GRID;
+        emitSmoke(randX, p.height - 2, smokeCount, 1.0, 2.0, 20, 30);
+        
+        if (p.random() < 0.15 * smokeIntensity) {
+          const randX2 = Math.round(p.random(p.width * 0.02, p.width * 0.98) / GRID) * GRID;
+          emitSmoke(randX2, p.height - 2, Math.floor(2 * smokeIntensity), 0.8, 1.6, 14, 24);
+        }
       }
     }
 
+    // Optimized smoke particle updates with batching
+    let currentTime = p.millis();
+    p.noStroke();
+    
     for (let i = smokes.length - 1; i >= 0; i--) {
       const sp = smokes[i];
-      if (p.millis() - sp.birth >= sp.life) { smokes.splice(i, 1); continue; }
+      if (currentTime - sp.birth >= sp.life) { 
+        smokes.splice(i, 1); 
+        continue; 
+      }
 
       sp.vy *= 0.9999;
       sp.y += sp.vy;
 
-      if (sp.y + sp.size * 0.5 < 0) { smokes.splice(i, 1); continue; }
+      if (sp.y + sp.size * 0.5 < 0) { 
+        smokes.splice(i, 1); 
+        continue; 
+      }
 
       sp.size += 0.08;
+      
+      // Batch calculations
       const sx = Math.round(sp.x / GRID) * GRID;
       const sy = Math.round(sp.y / GRID) * GRID;
-
-      const alpha = p.map(sp.y, p.height, 0, 0, 100);
-      p.noStroke();
+      const alpha = p.map(sp.y, p.height, 0, 0, 100 * adaptiveQuality);
+      
       if (sp.y > cy) p.fill(255, alpha);
       else p.fill(255, 0, 0, alpha);
       p.square(sx, sy, Math.round(sp.size));
@@ -343,10 +414,12 @@ const industrialSketch = (p) => {
     drawGearOutline(leftX,  cy, gearRad, teethN, +t);
     drawGearOutline(rightX, cy, gearRad, teethN, -t);
 
-    // ---- 4) circle animation INSIDE each main gear (clipped to inner circle) ----
-    const time = p.millis() / 1000;
-    drawCircleAnimInGear(leftX,  cy, gearRad * 0.88, time);
-    drawCircleAnimInGear(rightX, cy, gearRad * 0.88, time);
+    // ---- 4) adaptive circle animation INSIDE each main gear ----
+    if (p.frameCount % circleAnimUpdateFrequency === 0) {
+      const time = p.millis() / 1000;
+      drawCircleAnimInGear(leftX,  cy, gearRad * 0.88, time);
+      drawCircleAnimInGear(rightX, cy, gearRad * 0.88, time);
+    }
 
     // ---- hover affects spin speed + GEAR SOUND RATE/PAN ----
     const leftHover  = p.dist(p.mouseX, p.mouseY, leftX,  cy) < gearRad;
@@ -366,6 +439,13 @@ const industrialSketch = (p) => {
 
     // ---- draw audio toggle button on top ----
     drawAudioButton();
+    
+    // Performance monitoring
+    if (p.frameCount % 120 === 0) {
+      let avgFrameTime = performanceHistory.length > 0 ? 
+          performanceHistory.reduce((a, b) => a + b, 0) / performanceHistory.length : 0;
+      console.log(`Sketch3 FPS: ${p.frameRate().toFixed(1)}, Quality: ${(adaptiveQuality * 100).toFixed(0)}%, Frame Time: ${avgFrameTime.toFixed(1)}ms, MiniGears: ${miniGears.length}, Smoke: ${smokes.length}`);
+    }
   };
 
   /* ================== PIPES LAYER ================== */
@@ -409,14 +489,15 @@ const industrialSketch = (p) => {
 
     p.translate(cx, cy);
     p.noFill();
-    p.stroke(255, 180);
+    p.stroke(255, 180 * adaptiveQuality);
     p.strokeWeight(1);
 
-    const NUM_SIDES = 28;
+    // Adaptive quality parameters
+    const NUM_SIDES = Math.floor(20 + (adaptiveQuality * 8)); // 20-28 sides
     const R_START   = 0.12;
     const R_END     = 0.95;
-    const R_STEP    = 0.06;
-    const SMOOTH_IT = 2;
+    const R_STEP    = Math.max(0.06, 0.12 - (adaptiveQuality * 0.06)); // Adaptive step
+    const SMOOTH_IT = Math.floor(1 + adaptiveQuality); // 1-2 smoothing iterations
     const DIST_AMT  = 0.06;
     const FREQ      = 2.1;
 
@@ -426,9 +507,11 @@ const industrialSketch = (p) => {
       pts = chaikin(pts, SMOOTH_IT);
 
       p.beginShape();
+      // Optimize vertex drawing
+      const rMaxDouble = rMax * 2;
       for (let k = 0; k < pts.length; k++) {
-        const px = (pts[k][0] - 0.5) * (rMax * 2);
-        const py = (pts[k][1] - 0.5) * (rMax * 2);
+        const px = (pts[k][0] - 0.5) * rMaxDouble;
+        const py = (pts[k][1] - 0.5) * rMaxDouble;
         p.vertex(px, py);
       }
       p.endShape(p.CLOSE);
@@ -518,13 +601,30 @@ const industrialSketch = (p) => {
       this.speed = p.random(0.004, 0.012) * this.dir;
       this.strokeCol = p.color(p.random(colors));
       this.fillCol = p.color(1, 200);
+      this.lastUpdate = 0;
     }
-    update() { this.rot += this.speed; }
+    
+    update() { 
+      // Adaptive update frequency
+      if (isMobile && adaptiveQuality < 0.8) {
+        // Update less frequently on mobile when performance is low
+        if (p.frameCount - this.lastUpdate < 2) return;
+      }
+      this.rot += this.speed * adaptiveQuality; 
+      this.lastUpdate = p.frameCount;
+    }
+    
     draw(pg) {
-      drawGearToPG(pg, this.x, this.y, this.r, this.teeth, this.rot, this.fillCol, this.strokeCol, 1);
-      pg.noStroke();
-      pg.fill(10, 120);
-      pg.circle(this.x, this.y, this.r * 0.22);
+      // Adaptive rendering quality
+      let strokeWeight = Math.max(0.5, 1 * adaptiveQuality);
+      drawGearToPG(pg, this.x, this.y, this.r, this.teeth, this.rot, this.fillCol, this.strokeCol, strokeWeight);
+      
+      // Only draw center circle if quality is good enough
+      if (adaptiveQuality > 0.7) {
+        pg.noStroke();
+        pg.fill(10, 120 * adaptiveQuality);
+        pg.circle(this.x, this.y, this.r * 0.22);
+      }
     }
   }
 
@@ -535,12 +635,23 @@ const industrialSketch = (p) => {
     pg.stroke(strokeCol);
     pg.strokeWeight(sw);
     pg.fill(fillCol);
-    const a = 1, b = 20, numP = 120;
+    
+    // Adaptive gear resolution based on performance
+    const a = 1, b = 20;
+    let numP = Math.floor(60 + (adaptiveQuality * 60)); // 60-120 points
+    numP = Math.max(24, numP); // Minimum for recognizable gear shape
+    
     pg.beginShape();
+    const radScale = rad;
+    const twoPI = p.TWO_PI;
+    const invB = 1 / b;
+    
     for (let i = 0; i < numP; i++) {
-      const tt = p.TWO_PI * (i / numP);
-      const r = a + (1 / b) * Math.tanh(b * Math.sin(nTeeth * tt));
-      pg.vertex(rad * r * Math.cos(tt), rad * r * Math.sin(tt));
+      const tt = twoPI * (i / numP);
+      const r = a + invB * Math.tanh(b * Math.sin(nTeeth * tt));
+      const costt = Math.cos(tt);
+      const sintt = Math.sin(tt);
+      pg.vertex(radScale * r * costt, radScale * r * sintt);
     }
     pg.endShape(p.CLOSE);
     pg.pop();
