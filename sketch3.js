@@ -165,7 +165,7 @@ const industrialSketch = (p) => {
     miniGearsTarget = Math.round(200 * scaleUI * scaleUI);
     miniGearsTarget = Math.max(60, Math.min(miniGearsTarget, 220));
     
-    console.log(`🎯 Layout updated: ${p.width}x${p.height}, Device: ${isMobile ? 'Mobile' : isTablet ? 'Tablet' : 'Desktop'}, Scale: ${scaleUI.toFixed(2)}, GearRad: ${gearRad.toFixed(1)}, Offset: ${gearOffset.toFixed(1)}, leftX: ${leftX.toFixed(1)}, rightX: ${rightX.toFixed(1)}, cy: ${cy.toFixed(1)}`);
+
   }
 
   p.setup = () => {
