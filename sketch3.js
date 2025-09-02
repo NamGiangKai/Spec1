@@ -73,7 +73,7 @@ const industrialSketch = (p) => {
   let gearPan  = 0.0;         // current pan
   const RATE_BASE  = 0.95;    // idle rate
   const RATE_HOVER = 1.35;    // hover rate
-  const SMOOTH     = 0.12;    // smoothing factor per frame (0..1)
+  const SMOOTH     = 0.2;        // smoothing factor per frame (0..1)
 
   // ---- smoke sound throttle ----
   let lastSmokePlay = 0;
@@ -269,17 +269,15 @@ const industrialSketch = (p) => {
     // place mini-gears randomly with no overlap (and not colliding with main gears)
     createMiniGearsNoOverlap();
 
-    // prepare loops (don't start until button click)
-    ambience.setLoop(true);
-    ambience.setVolume(0.2);
-
-    gearSound.setLoop(true);
-    gearSound.setVolume(0.3);
-    gearSound.rate(RATE_BASE);
-
+    // Sounds edit----------
+    if (ambience) {
+      ambience.setLoop(true);
+      ambience.setVolume(0.3);
+    }
+    
     if (pipesSound) {
       pipesSound.setLoop(true);
-      pipesSound.setVolume(0.1);
+      pipesSound.setVolume(0.35);
       pipesSound.rate(1.7);
       //add reverb
       pipeFilter = new p5.LowPass(3);
@@ -287,6 +285,12 @@ const industrialSketch = (p) => {
       pipesSound.connect(pipeFilter); // send through filter
       pipeFilter.freq(670);      // cutoff (Hz) — lower = more muffled
       pipeFilter.res(17);         // resonance around cutoff
+    }
+    
+    if (gearSound) {
+      gearSound.setLoop(true);
+      gearSound.setVolume(1.0);
+      gearSound.rate(RATE_BASE);
     }
 
     if (smokeSound) smokeSound.setVolume(1.5);
@@ -541,13 +545,15 @@ const industrialSketch = (p) => {
     const hovering   = leftHover || rightHover;
     t += hovering ? 0.08 : 0.03;
 
-    const targetRate = hovering ? RATE_HOVER : RATE_BASE;
-    gearRate = p.lerp(gearRate, targetRate, SMOOTH);
-    if (gearSound && gearSound.isPlaying()) gearSound.rate(gearRate);
+    if (audioEnabled && gearSound && gearSound.isPlaying()) {
+      const targetRate = hovering ? RATE_HOVER : RATE_BASE;
+      gearRate = p.lerp(gearRate, targetRate, SMOOTH);
+      gearSound.rate(gearRate);
 
-    const targetPan = leftHover ? -0.7 : rightHover ? 0.7 : 0.0;
-    gearPan = p.lerp(gearPan, targetPan, SMOOTH);
-    if (gearSound && gearSound.isPlaying()) gearSound.pan(gearPan);
+      const targetPan = leftHover ? -0.7 : rightHover ? 0.7 : 0.0;
+      gearPan = p.lerp(gearPan, targetPan, SMOOTH);
+      gearSound.pan(gearPan);
+    }
 
     p.drawQuote();
 
