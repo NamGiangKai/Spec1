@@ -14,7 +14,7 @@ const industrialSketch = (p) => {
   let img;
   let ambience, smokeSound, gearSound, pipesSound;
   let muteImg, unmuteImg;
-  let pipeFilter;
+
 
   // =================== GEARS + SMOKE + MINI-GEARS BG + CIRCLE ANIM INSIDE MAIN GEARS + PIPES UNDERLAY ===================
 
@@ -259,7 +259,6 @@ const industrialSketch = (p) => {
       for (let i = 0; i < COLS; i++) tileRot[j][i] = p.floor(p.random(4));
     }
     buildPipesLayer();
-    buildStripes();
 
     // place mini-gears randomly with no overlap (and not colliding with main gears)
     createMiniGearsNoOverlap();
@@ -274,14 +273,8 @@ const industrialSketch = (p) => {
 
     if (pipesSound) {
       pipesSound.setLoop(true);
-      pipesSound.setVolume(0.1);
+      pipesSound.setVolume(0.5);
       pipesSound.rate(1.7);
-      // add reverb/filter
-      pipeFilter = new p5.LowPass();
-      pipesSound.disconnect();   // detach from master output
-      pipesSound.connect(pipeFilter); // send through filter
-      pipeFilter.freq(670);      // cutoff (Hz) — lower = more muffled
-      pipeFilter.res(17);        // resonance around cutoff
     }
 
     if (smokeSound) smokeSound.setVolume(1.5);
@@ -309,7 +302,6 @@ const industrialSketch = (p) => {
       for (let i = 0; i < COLS; i++) tileRot[j][i] = p.floor(p.random(4));
     }
     buildPipesLayer();
-    buildStripes();
     createMiniGearsNoOverlap();
   };
 
@@ -389,10 +381,9 @@ const industrialSketch = (p) => {
       p.rect(s.baseX + dx, 0, s.w, p.height * 2);
     }
 
-    // ---- 1) PIPES UNDERLAY (static) ----
-    p.image(pipesPG, 0, 0);
 
-    // ---- 2) mini gears background (animated with adaptive updates) ----
+
+    // ---- 1) mini gears background (animated with adaptive updates) ----
     if (p.frameCount % miniGearUpdateFrequency === 0) {
       bgPG.clear();
       // Adaptive mini gear rendering
@@ -404,7 +395,7 @@ const industrialSketch = (p) => {
     }
     p.image(bgPG, 0, 0);
 
-    // ---- 3) adaptive smoke system ----
+    // ---- 2) adaptive smoke system ----
     if (p.frameCount % smokeUpdateFrequency === 0) {
       // Reduce smoke emission based on performance
       let smokeIntensity = adaptiveQuality;
@@ -461,11 +452,11 @@ const industrialSketch = (p) => {
       p.image(img, x, y, w, h);
     }
 
-    // ---- 4) foreground main gear outlines (no fill -> shows animation) ----
+    // ---- 3) foreground main gear outlines (no fill -> shows animation) ----
     drawGearOutline(leftX,  cy, gearRad, teethN, +t);
     drawGearOutline(rightX, cy, gearRad, teethN, -t);
 
-    // ---- 5) adaptive circle animation INSIDE each main gear ----
+    // ---- 4) adaptive circle animation INSIDE each main gear ----
     if (p.frameCount % circleAnimUpdateFrequency === 0) {
       const time = p.millis() / 1000;
       drawCircleAnimInGear(leftX,  cy, gearRad * 0.88, time);
@@ -499,39 +490,8 @@ const industrialSketch = (p) => {
     }
   };
 
-  /* ================== PIPES LAYER ================== */
-  function buildPipesLayer() {
-    const pg = pipesPG;
-    pg.clear(); // keep transparent background
-    pg.stroke(40, 0, 0, 140);
-    pg.strokeWeight(PIPE_W);
-    pg.noFill();
-    pg.strokeCap(p.SQUARE);
-    pg.strokeJoin(p.MITER);
-
-    const h = TILE / 2;
-
-    for (let j = 0; j < ROWS; j++) {
-      for (let i = 0; i < COLS; i++) {
-        pg.push();
-        pg.translate(i * TILE + TILE / 2, j * TILE + TILE / 2);
-        pg.rotate(p.HALF_PI * tileRot[j][i]);
-
-        // elbow 1: TOP -> RIGHT via NE
-        pg.line(0, -h,  h, -h);
-        pg.line( h, -h, h,  0);
-
-        // elbow 2: BOTTOM -> LEFT via SW
-        pg.line(0,  h, -h,  h);
-        pg.line(-h,  h, -h, 0);
-
-        pg.pop();
-      }
-    }
-  }
-
   /* ================== STRIPES BACKGROUND ================== */
-  function buildStripes() {
+  function buildPipesLayer() {
     stripes = [];
     let x = 0;
     while (x < p.width) {
@@ -540,12 +500,14 @@ const industrialSketch = (p) => {
       stripes.push({
         baseX: x,                   
         w: w,                       
-        offset: p.random(p.PI/2),   // rhythm move    
+        offset: p.random(p.PI/2),       
         speed: p.random(1, 10)        
       });
       x += w + gap;
     }
   }
+
+
 
   /* ================== CIRCLE ANIM INSIDE GEARS ================== */
   function drawCircleAnimInGear(cx, cy, rMax, time) {
@@ -560,19 +522,17 @@ const industrialSketch = (p) => {
     p.stroke(255, 180 * adaptiveQuality);
     p.strokeWeight(1);
 
-    // Adaptive quality parameters
-    const NUM_SIDES = Math.floor(20 + (adaptiveQuality * 5)); // 20-25 sides
+    // Circle animation parameters
+    const NUM_SIDES = 25;
     const R_START   = 0.12;
     const R_END     = 0.95;
-    const R_STEP    = Math.max(0.04, 0.08 - (adaptiveQuality * 0.04)); // Adaptive step
-    const SMOOTH_IT = 0; // No smoothing for better performance
+    const R_STEP    = 0.04;
     const DIST_AMT  = 0.2;
     const FREQ      = 0;
 
     for (let rn = R_START; rn <= R_END; rn += R_STEP) {
       let pts = makeCircle(NUM_SIDES, rn);
       pts = distortPolygonCircle(pts, time, DIST_AMT, FREQ);
-      pts = chaikin(pts, SMOOTH_IT);
 
       p.beginShape();
       // Optimize vertex drawing
@@ -600,15 +560,15 @@ const industrialSketch = (p) => {
     return points;
   }
 
-  function distortPolygonCircle(poly, t, amount = 0.2, freq = 0) {
+  function distortPolygonCircle(poly, t, amount = 0.06, freq = 2.0) {
     return poly.map(([x, y]) => {
       const cx = x - 0.5;
       const cy = y - 0.5;
-      const r  = Math.sqrt(cx*cx + cy*cy);
+      const r  = Math.sqrt(cx * cx + cy * cy);
       const ang = Math.atan2(cy, cx);
       const n = p.noise(Math.cos(ang) * freq + 10, Math.sin(ang) * freq + t * 0.5);
       const nudge = (n - 0.5) * 2 * amount * (0.5 + r);
-      const newR = Math.max(0, r + nudge);
+      const newR  = Math.max(0, r + nudge);
       return [0.5 + newR * Math.cos(ang), 0.5 + newR * Math.sin(ang)];
     });
   }
@@ -831,24 +791,14 @@ const industrialSketch = (p) => {
 
     // Quote text removed
 
-    p.textSize(callToActionSize);
-    p.fill('#EB0000');
-    p.textStyle(p.BOLD);
-    let callToAction = 'Cut the fumes, not our breath.';
-    p.text(callToAction, x + CTA_DX, y + CTA_DY, maxWidth);
+    // Call to action text removed
 
     // Additional safety check to prevent text cutoff
     if (x + maxWidth > p.width - 15) {
       maxWidth = p.width - x - 15;
     }
 
-    // Update quoteBox for hover detection
-    const tw = p.textWidth(callToAction);
-    const th = p.textAscent() + p.textDescent();
-    quoteBox.x = x + CTA_DX;
-    quoteBox.y = y + CTA_DY - th;
-    quoteBox.w = maxWidth;
-    quoteBox.h = th;
+    // Quote box removed since there's no text
   };
 };
 
