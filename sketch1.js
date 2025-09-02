@@ -547,10 +547,25 @@ const sketch1 = (p) => {
         touchX *= scaleX;
         touchY *= scaleY;
         
-        handleInteraction(touchX, touchY);
+        // Only process touches within canvas bounds
+        if (touchX < 0 || touchX > p.width || touchY < 0 || touchY > p.height) {
+            return; // Touch outside canvas, allow default scrolling
+        }
         
-        // Prevent default touch behavior to avoid scrolling
-        return false;
+        // Check if touch is on mute button
+        let buttonSize = isMobile ? 40 : isTablet ? 45 : 50;
+        let buttonX = isMobile ? 20 : isTablet ? 30 : 50;
+        let buttonY = isMobile ? 20 : isTablet ? 30 : 50;
+        
+        if (touchX > buttonX && touchX < buttonX + buttonSize && 
+            touchY > buttonY && touchY < buttonY + buttonSize) {
+            handleInteraction(touchX, touchY);
+            return false; // Only prevent default for button interactions
+        }
+        
+        // For canvas interactions, handle but allow scrolling
+        handleInteraction(touchX, touchY);
+        // Don't return false - allow default touch behavior for scrolling
     };
     
     p.keyPressed = function() {
