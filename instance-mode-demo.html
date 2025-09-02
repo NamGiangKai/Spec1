@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P5.js Instance Mode Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .sketch-container {
+            margin: 20px 0;
+            border: 2px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .sketch-title {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            margin: 0;
+            font-size: 18px;
+        }
+        .controls {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .info {
+            background-color: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>P5.js Instance Mode Demo</h1>
+        
+        <div class="info">
+            <h3>About Instance Mode</h3>
+            <p>This demo shows how to use P5.js in instance mode. Instance mode allows you to:</p>
+            <ul>
+                <li>Create multiple sketches on the same page</li>
+                <li>Have better control over sketch lifecycle</li>
+                <li>Avoid global namespace pollution</li>
+                <li>Use P5.js in modular applications</li>
+            </ul>
+        </div>
+
+        <div class="sketch-container">
+            <h3 class="sketch-title">Sketch 2 - Centipede Animation</h3>
+            <div id="sketch2-container"></div>
+            <div class="controls">
+                <button id="start-sketch2">Start Sketch 2</button>
+                <button id="stop-sketch2">Stop Sketch 2</button>
+                <button id="restart-sketch2">Restart Sketch 2</button>
+            </div>
+        </div>
+
+        <div class="sketch-container">
+            <h3 class="sketch-title">Sketch 2 (Second Instance)</h3>
+            <div id="sketch2-container-2"></div>
+            <div class="controls">
+                <button id="start-sketch2-2">Start Second Instance</button>
+                <button id="stop-sketch2-2">Stop Second Instance</button>
+                <button id="restart-sketch2-2">Restart Second Instance</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load P5.js libraries -->
+    <script src="p5.js"></script>
+    <script src="p5.sound.min.js"></script>
+    
+    <!-- Load our instance mode modules -->
+    <script src="sound2.js"></script>
+    <script src="sketch2.js"></script>
+    
+    <script>
+        // Global variables to store sketch instances
+        let sketch2Instance = null;
+        let sketch2Instance2 = null;
+
+        // Initialize first sketch instance
+        function initSketch2() {
+            if (sketch2Instance) {
+                sketch2Instance.remove();
+            }
+            
+            const container = document.getElementById('sketch2-container');
+            sketch2Instance = new p5(sketch2, container);
+            
+            // Update button states
+            document.getElementById('start-sketch2').disabled = true;
+            document.getElementById('stop-sketch2').disabled = false;
+            document.getElementById('restart-sketch2').disabled = false;
+        }
+
+        // Initialize second sketch instance
+        function initSketch2Second() {
+            if (sketch2Instance2) {
+                sketch2Instance2.remove();
+            }
+            
+            const container = document.getElementById('sketch2-container-2');
+            sketch2Instance2 = new p5(sketch2, container);
+            
+            // Update button states
+            document.getElementById('start-sketch2-2').disabled = true;
+            document.getElementById('stop-sketch2-2').disabled = false;
+            document.getElementById('restart-sketch2-2').disabled = false;
+        }
+
+        // Stop first sketch
+        function stopSketch2() {
+            if (sketch2Instance) {
+                sketch2Instance.remove();
+                sketch2Instance = null;
+                
+                // Update button states
+                document.getElementById('start-sketch2').disabled = false;
+                document.getElementById('stop-sketch2').disabled = true;
+                document.getElementById('restart-sketch2').disabled = true;
+            }
+        }
+
+        // Stop second sketch
+        function stopSketch2Second() {
+            if (sketch2Instance2) {
+                sketch2Instance2.remove();
+                sketch2Instance2 = null;
+                
+                // Update button states
+                document.getElementById('start-sketch2-2').disabled = false;
+                document.getElementById('stop-sketch2-2').disabled = true;
+                document.getElementById('restart-sketch2-2').disabled = true;
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // First sketch controls
+            document.getElementById('start-sketch2').addEventListener('click', initSketch2);
+            document.getElementById('stop-sketch2').addEventListener('click', stopSketch2);
+            document.getElementById('restart-sketch2').addEventListener('click', function() {
+                stopSketch2();
+                setTimeout(initSketch2, 100);
+            });
+
+            // Second sketch controls
+            document.getElementById('start-sketch2-2').addEventListener('click', initSketch2Second);
+            document.getElementById('stop-sketch2-2').addEventListener('click', stopSketch2Second);
+            document.getElementById('restart-sketch2-2').addEventListener('click', function() {
+                stopSketch2Second();
+                setTimeout(initSketch2Second, 100);
+            });
+
+            // Initialize button states
+            document.getElementById('stop-sketch2').disabled = true;
+            document.getElementById('restart-sketch2').disabled = true;
+            document.getElementById('stop-sketch2-2').disabled = true;
+            document.getElementById('restart-sketch2-2').disabled = true;
+        });
+    </script>
+</body>
+</html>

@@ -1,9 +1,20 @@
+// REFERENCES
+// https://www.youtube.com/shorts/bufM6jE2afA - Visual inspiration
+// https://openprocessing.org/sketch/2439209 - Infinite Maze by Gonçalo Perdigão - Pipe idea
+// https://openprocessing.org/sketch/2307260 - shifted gears by mathfoxLab - Gear shape
+// https://openprocessing.org/sketch/2407392 - 241022a by Okazz - check for collision and overlap
+// https://openprocessing.org/sketch/2023508 - Mod fix by Mascaria
+// https://openprocessing.org/sketch/112920 - Grid Generator by Sam Richardson - Pipe shapes
+//
+// Released under GPL3. more information: https://www.gnu.org/licenses/gpl-3.0.en.html
+
 // Converted to p5 instance mode
 const industrialSketch = (p) => {
   // Sounds & Images
   let img;
-  let ambience, smokeSound, gearSound;
+  let ambience, smokeSound, gearSound, pipesSound;
   let muteImg, unmuteImg;
+  let pipeFilter;
 
   // =================== GEARS + SMOKE + MINI-GEARS BG + CIRCLE ANIM INSIDE MAIN GEARS + PIPES UNDERLAY ===================
 
@@ -34,7 +45,8 @@ const industrialSketch = (p) => {
   let bgPG;                     // mini gears layer (transparent)
   let pipesPG;                  // Truchet pipes layer (transparent, drawn under mini-gears)
   let miniGears = [];
-  let colors = ['rgb(160,159,159)', '#929292', '#580302', '#9B1E1E'];
+  let stripes = [];             // animated stripes background
+  let colors = ['rgb(216,215,215)', '#929292', '#580302', '#B11010'];
 
   // placement + sizing (all mini gears < main gear)
   let miniRMin = gearRad * 0.08;
@@ -64,7 +76,7 @@ const industrialSketch = (p) => {
 
   // ---- smoke sound throttle ----
   let lastSmokePlay = 0;
-  const SMOKE_INTERVAL = 90;  // ms between smoke sound retriggers while dragging
+  const SMOKE_INTERVAL = 20;  // ms between smoke sound retriggers while dragging
 
   // ---- audio toggle button ----
   let audioEnabled = false; // start MUTED
@@ -227,6 +239,7 @@ const industrialSketch = (p) => {
     ambience   = p.loadSound('ambience.wav');
     gearSound  = p.loadSound('gear.wav');
     smokeSound = p.loadSound('smoke.wav');
+    pipesSound = p.loadSound('pipes.wav');
     img        = p.loadImage('maskfr.png');
     muteImg    = p.loadImage('mute.png');
     unmuteImg  = p.loadImage('unmute.png');
@@ -246,19 +259,32 @@ const industrialSketch = (p) => {
       for (let i = 0; i < COLS; i++) tileRot[j][i] = p.floor(p.random(4));
     }
     buildPipesLayer();
+    buildStripes();
 
     // place mini-gears randomly with no overlap (and not colliding with main gears)
     createMiniGearsNoOverlap();
 
-    // prepare loops (don’t start until button click)
+    // prepare loops (don't start until button click)
     ambience.setLoop(true);
-    ambience.setVolume(1);
+    ambience.setVolume(0.2);
 
     gearSound.setLoop(true);
-    gearSound.setVolume(1);
+    gearSound.setVolume(0.3);
     gearSound.rate(RATE_BASE);
 
-    if (smokeSound) smokeSound.setVolume(3);
+    if (pipesSound) {
+      pipesSound.setLoop(true);
+      pipesSound.setVolume(0.1);
+      pipesSound.rate(1.7);
+      // add reverb/filter
+      pipeFilter = new p5.LowPass();
+      pipesSound.disconnect();   // detach from master output
+      pipesSound.connect(pipeFilter); // send through filter
+      pipeFilter.freq(670);      // cutoff (Hz) — lower = more muffled
+      pipeFilter.res(17);        // resonance around cutoff
+    }
+
+    if (smokeSound) smokeSound.setVolume(1.5);
   };
 
   // handle resize responsively
@@ -283,6 +309,7 @@ const industrialSketch = (p) => {
       for (let i = 0; i < COLS; i++) tileRot[j][i] = p.floor(p.random(4));
     }
     buildPipesLayer();
+    buildStripes();
     createMiniGearsNoOverlap();
   };
 
@@ -314,9 +341,11 @@ const industrialSketch = (p) => {
         gearSound.rate(gearRate);
         gearSound.pan(gearPan);
       }
+      if (pipesSound && !pipesSound.isPlaying()) pipesSound.loop();
     } else {
       if (ambience && ambience.isPlaying()) ambience.stop();
       if (gearSound && gearSound.isPlaying()) gearSound.stop();
+      if (pipesSound && pipesSound.isPlaying()) pipesSound.stop();
       // smokeSound is one-shot; just prevent future plays while muted
     }
   }
@@ -351,10 +380,19 @@ const industrialSketch = (p) => {
     
     p.background(0);
 
-    // ---- 0) PIPES UNDERLAY (static) ----
+    // ---- 0) ANIMATED STRIPES BACKGROUND ----
+    p.noStroke();
+    const times = p.millis() / 1000;
+    for (let s of stripes) {
+      const dx = p.sin(times * 2 + s.offset) * 10 * s.speed;
+      p.fill(100, 0, 0, 140);   
+      p.rect(s.baseX + dx, 0, s.w, p.height * 2);
+    }
+
+    // ---- 1) PIPES UNDERLAY (static) ----
     p.image(pipesPG, 0, 0);
 
-    // ---- 1) mini gears background (animated with adaptive updates) ----
+    // ---- 2) mini gears background (animated with adaptive updates) ----
     if (p.frameCount % miniGearUpdateFrequency === 0) {
       bgPG.clear();
       // Adaptive mini gear rendering
@@ -366,7 +404,7 @@ const industrialSketch = (p) => {
     }
     p.image(bgPG, 0, 0);
 
-    // ---- 2) adaptive smoke system ----
+    // ---- 3) adaptive smoke system ----
     if (p.frameCount % smokeUpdateFrequency === 0) {
       // Reduce smoke emission based on performance
       let smokeIntensity = adaptiveQuality;
@@ -423,11 +461,11 @@ const industrialSketch = (p) => {
       p.image(img, x, y, w, h);
     }
 
-    // ---- 3) foreground main gear outlines (no fill -> shows animation) ----
+    // ---- 4) foreground main gear outlines (no fill -> shows animation) ----
     drawGearOutline(leftX,  cy, gearRad, teethN, +t);
     drawGearOutline(rightX, cy, gearRad, teethN, -t);
 
-    // ---- 4) adaptive circle animation INSIDE each main gear ----
+    // ---- 5) adaptive circle animation INSIDE each main gear ----
     if (p.frameCount % circleAnimUpdateFrequency === 0) {
       const time = p.millis() / 1000;
       drawCircleAnimInGear(leftX,  cy, gearRad * 0.88, time);
@@ -492,6 +530,23 @@ const industrialSketch = (p) => {
     }
   }
 
+  /* ================== STRIPES BACKGROUND ================== */
+  function buildStripes() {
+    stripes = [];
+    let x = 0;
+    while (x < p.width) {
+      const w = p.random(2, 6);      
+      const gap = p.random(8, 30);    
+      stripes.push({
+        baseX: x,                   
+        w: w,                       
+        offset: p.random(p.PI/2),   // rhythm move    
+        speed: p.random(1, 10)        
+      });
+      x += w + gap;
+    }
+  }
+
   /* ================== CIRCLE ANIM INSIDE GEARS ================== */
   function drawCircleAnimInGear(cx, cy, rMax, time) {
     p.push();
@@ -506,13 +561,13 @@ const industrialSketch = (p) => {
     p.strokeWeight(1);
 
     // Adaptive quality parameters
-    const NUM_SIDES = Math.floor(20 + (adaptiveQuality * 8)); // 20-28 sides
+    const NUM_SIDES = Math.floor(20 + (adaptiveQuality * 5)); // 20-25 sides
     const R_START   = 0.12;
     const R_END     = 0.95;
-    const R_STEP    = Math.max(0.06, 0.12 - (adaptiveQuality * 0.06)); // Adaptive step
-    const SMOOTH_IT = Math.floor(1 + adaptiveQuality); // 1-2 smoothing iterations
-    const DIST_AMT  = 0.06;
-    const FREQ      = 2.1;
+    const R_STEP    = Math.max(0.04, 0.08 - (adaptiveQuality * 0.04)); // Adaptive step
+    const SMOOTH_IT = 0; // No smoothing for better performance
+    const DIST_AMT  = 0.2;
+    const FREQ      = 0;
 
     for (let rn = R_START; rn <= R_END; rn += R_STEP) {
       let pts = makeCircle(NUM_SIDES, rn);
@@ -545,13 +600,13 @@ const industrialSketch = (p) => {
     return points;
   }
 
-  function distortPolygonCircle(poly, t, amount = 0.06, freq = 2.0) {
+  function distortPolygonCircle(poly, t, amount = 0.2, freq = 0) {
     return poly.map(([x, y]) => {
       const cx = x - 0.5;
       const cy = y - 0.5;
       const r  = Math.sqrt(cx*cx + cy*cy);
       const ang = Math.atan2(cy, cx);
-      const n = p.noise( Math.cos(ang) * freq + 1.23, Math.sin(ang) * freq + t * 0.4 );
+      const n = p.noise(Math.cos(ang) * freq + 10, Math.sin(ang) * freq + t * 0.5);
       const nudge = (n - 0.5) * 2 * amount * (0.5 + r);
       const newR = Math.max(0, r + nudge);
       return [0.5 + newR * Math.cos(ang), 0.5 + newR * Math.sin(ang)];
@@ -608,12 +663,12 @@ const industrialSketch = (p) => {
   class MiniGear {
     constructor(x, y, r) {
       this.x = x; this.y = y; this.r = r;
-      this.teeth = p.int(p.random([6, 8, 10, 12]));
-      this.dir = p.random([1, -1]);
+      this.teeth = p.int(p.random([6, 8, 10]));
+      this.dir = p.random([2, -1]);
       this.rot = p.random(p.TWO_PI);
-      this.speed = p.random(0.004, 0.012) * this.dir;
+      this.speed = p.random(0.006, 0.012) * this.dir;
       this.strokeCol = p.color(p.random(colors));
-      this.fillCol = p.color(1, 200);
+      this.fillCol = p.color(1, 10);
       this.lastUpdate = 0;
     }
     
@@ -632,11 +687,11 @@ const industrialSketch = (p) => {
       let strokeWeight = Math.max(0.5, 1 * adaptiveQuality);
       drawGearToPG(pg, this.x, this.y, this.r, this.teeth, this.rot, this.fillCol, this.strokeCol, strokeWeight);
       
-      // Only draw center circle if quality is good enough
+      // Only draw center rectangle if quality is good enough
       if (adaptiveQuality > 0.7) {
         pg.noStroke();
-        pg.fill(10, 120 * adaptiveQuality);
-        pg.circle(this.x, this.y, this.r * 0.22);
+        pg.fill(60, 10 * adaptiveQuality);
+        pg.rect(this.x, this.y, this.r * 0.3);
       }
     }
   }
@@ -701,8 +756,8 @@ const industrialSketch = (p) => {
       if (p.getAudioContext().state !== 'running') p.userStartAudio();
       const pan = p.map(p.mouseX, 0, p.width, -0.9, 0.9);
       smokeSound.pan(pan);
-      smokeSound.rate(p.random(0.95, 1.05)); // tiny variation
-      smokeSound.setVolume(2);
+      smokeSound.rate(p.random(0.15, 1.05)); // wider variation
+      smokeSound.setVolume(1.5);
       smokeSound.play();
       lastSmokePlay = now;
     }
@@ -723,7 +778,7 @@ const industrialSketch = (p) => {
     }
   }
 
-  function clearSmoke() { smokes.length = 10; }
+  function clearSmoke() { smokes.length = 0; }
   p.keyPressed = () => { if (p.key === 'c' || p.key === 'C') clearSmoke(); };
 
   p.drawQuote = () => {
@@ -774,17 +829,7 @@ const industrialSketch = (p) => {
       callToActionSize = p.width > 1200 ? 15 : p.width > 800 ? 14 : 12;
     }
 
-    let quote = '"We are facing a man-made disaster on a global scale. Our greatest threat in thousands of years. Climate change."';
-
-    p.textSize(mainTextSize);
-    p.textStyle(p.BOLD);
-    p.textFont('Source Code Pro');
-    p.textAlign(p.LEFT);
-    p.text(quote, x, y, maxWidth);
-
-    p.textSize(attributionSize);
-    p.textStyle(p.NORMAL);
-    p.text('— Sir David Attenborough', x + AUTHOR_DX, y + AUTHOR_DY, maxWidth);
+    // Quote text removed
 
     p.textSize(callToActionSize);
     p.fill('#EB0000');

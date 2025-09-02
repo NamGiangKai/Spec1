@@ -12,6 +12,13 @@ const sketch1 = (p) => {
     let isMuted = true; // Bắt đầu ở trạng thái tắt tiếng, lần click đầu tiên sẽ bật lên
     let soundHasStarted = false; // Biến mới để theo dõi trạng thái bắt đầu của âm thanh
     let muteIcon, unmuteIcon;
+    let peelSound;
+    let lightningSound;
+    let lightningHurtSound;
+
+    let lightningImgs = [];
+    let activeLightnings = [];
+    let scarSquares = []; // Squares for the "peel" effect
 
     // ---- responsive scaling ----
     let scaleUI = 1; // relative to 1920x1080
@@ -101,12 +108,33 @@ const sketch1 = (p) => {
 
         p.loadImage("mute.png", (img) => {
             muteIcon = img;
-
         });
         p.loadImage("unmute.png", (img) => {
             unmuteIcon = img;
-
         });
+
+        // Load additional sounds
+        p.loadSound('peelcombine.wav', 
+            (loadedSound) => { peelSound = loadedSound; },
+            (error) => { console.log("Failed to load peel sound:", error); }
+        );
+        p.loadSound('lightningcombine.wav', 
+            (loadedSound) => { lightningSound = loadedSound; },
+            (error) => { console.log("Failed to load lightning sound:", error); }
+        );
+        p.loadSound('hurt.wav', 
+            (loadedSound) => { lightningHurtSound = loadedSound; },
+            (error) => { console.log("Failed to load hurt sound:", error); }
+        );
+
+        // Load the lightning images into an array
+        for (let i = 0; i < 4; i++) {
+            p.loadImage(`lightning${i + 1}.png`, (img) => {
+                lightningImgs[i] = img;
+            }, (error) => {
+                console.log(`Failed to load lightning${i + 1}.png:`, error);
+            });
+        }
 
         if (p.random() > 0.5) {
             bgColor = p.color(0);
@@ -203,6 +231,13 @@ const sketch1 = (p) => {
     p.draw = function () {
         // Performance monitoring
         updatePerformance();
+        
+        // Draw the peel effect squares first
+        for (let s of scarSquares) {
+            p.noStroke();
+            p.fill(s.col);
+            p.rect(s.x, s.y, s.size, s.size);
+        }
         
         p.background(bgColor.levels[0], 20);
 
@@ -395,6 +430,7 @@ const sketch1 = (p) => {
         }
 
         drawQuote();
+        drawLightning();
         
         // Performance monitoring
         if (p.frameCount % 120 === 0) {
@@ -413,23 +449,77 @@ const sketch1 = (p) => {
                 isMuted = false; // Bỏ tắt tiếng
                 sound.setVolume(1);
                 soundHasStarted = true; // Đánh dấu là âm thanh đã bắt đầu
-
-            } else {
-
+                
+                // Set volumes for additional sounds
+                if (peelSound && peelSound.isLoaded()) peelSound.setVolume(1.5);
+                if (lightningSound && lightningSound.isLoaded()) lightningSound.setVolume(0.4);
+                if (lightningHurtSound && lightningHurtSound.isLoaded()) lightningHurtSound.setVolume(0.3);
             }
+            return;
         }
-        // Các lần nhấn chuột SAU ĐÓ chỉ để BẬT/TẮT tiếng khi nhấn vào icon
-        else {
-            // Responsive button detection
-            let buttonSize = isMobile ? 40 : isTablet ? 45 : 50;
-            let buttonX = isMobile ? 20 : isTablet ? 30 : 50;
-            let buttonY = isMobile ? 20 : isTablet ? 30 : 50;
-            
-            if (p.mouseX > buttonX && p.mouseX < buttonX + buttonSize && p.mouseY > buttonY && p.mouseY < buttonY + buttonSize) {
-                isMuted = !isMuted; // Đảo ngược trạng thái
-                if (sound && sound.isLoaded()) {
-                    sound.setVolume(isMuted ? 0 : 1);
+        
+        // Handle mute/unmute button click first
+        let buttonSize = isMobile ? 40 : isTablet ? 45 : 50;
+        let buttonX = isMobile ? 20 : isTablet ? 30 : 50;
+        let buttonY = isMobile ? 20 : isTablet ? 30 : 50;
+        
+        if (p.mouseX > buttonX && p.mouseX < buttonX + buttonSize && p.mouseY > buttonY && p.mouseY < buttonY + buttonSize) {
+            isMuted = !isMuted; // Đảo ngược trạng thái
+            if (sound && sound.isLoaded()) {
+                sound.setVolume(isMuted ? 0 : 1);
+            }
+            // Set volumes for additional sounds
+            if (peelSound && peelSound.isLoaded()) peelSound.setVolume(isMuted ? 0 : 1.5);
+            if (lightningSound && lightningSound.isLoaded()) lightningSound.setVolume(isMuted ? 0 : 0.4);
+            if (lightningHurtSound && lightningHurtSound.isLoaded()) lightningHurtSound.setVolume(isMuted ? 0 : 0.3);
+            return;
+        }
 
+        // --- Handle clicks on the canvas ---
+
+        // 1. Create the "peel" effect
+        let squareSize = 60;
+        let squareColor = (bgColor.levels[0] === 255) ? p.color(0) : p.color(255);
+        scarSquares.push({
+            x: p.mouseX - squareSize / 2,
+            y: p.mouseY - squareSize / 2,
+            size: squareSize,
+            col: squareColor
+        });
+
+        // Play peel sound if loaded and not muted
+        if (!isMuted && peelSound && peelSound.isLoaded()) {
+            if (peelSound.isPlaying()) {
+                peelSound.stop();
+            }
+            peelSound.play();
+        }
+
+        // 2. Create the lightning effect only if images are loaded
+        if (lightningImgs.length === 4 && lightningImgs.every(img => img && img.width > 1)) {
+            let imgIndex = p.floor(p.random(0, lightningImgs.length));
+            let img = lightningImgs[imgIndex];
+            let scaleFactor = 2;
+            let w = img.width * scaleFactor;
+            let h = img.height * scaleFactor;
+            let x = p.random(p.width - w);
+            let y = p.random(p.height - h);
+            activeLightnings.push({ img, x, y, w, h, life: 30 });
+            
+            // Play lightning sounds if not muted and loaded
+            if (!isMuted) {
+                if (lightningSound && lightningSound.isLoaded()) {
+                    if (lightningSound.isPlaying()) {
+                        lightningSound.stop();
+                    }
+                    lightningSound.play();
+                }
+
+                if (lightningHurtSound && lightningHurtSound.isLoaded()) {
+                    if (lightningHurtSound.isPlaying()) {
+                        lightningHurtSound.stop();
+                    }
+                    lightningHurtSound.play();
                 }
             }
         }
@@ -631,20 +721,7 @@ const sketch1 = (p) => {
             callToActionSize = p.width > 1200 ? 15 : p.width > 800 ? 14 : 12;
         }
         
-        let quote = '"We are facing a man-made disaster on a global scale. Our greatest threat in thousands of years. Climate change."';
-        
-        p.textSize(mainTextSize);
-        p.textStyle(p.BOLD);
-        p.textFont("Source Code Pro");
-        p.textAlign(p.LEFT);
-        p.text(quote, x, y, maxWidth);
-        
-        // Responsive positioning for attribution - keep desktop-like spacing
-        let authorX = isMobile ? x + 15 : x + 20; // Mobile: slight offset like desktop
-        let authorY = isMobile ? y + 60 : y + 70; // Mobile: closer spacing
-        p.textSize(attributionSize);
-        p.textStyle(p.NORMAL);
-        p.text("— Sir David Attenborough", authorX, authorY, maxWidth);
+        // Quote text removed as requested
         
         // Responsive positioning for call to action - keep desktop-like spacing
         let ctaX = isMobile ? x + 80 : x + 110; // Mobile: proportional offset
@@ -666,9 +743,24 @@ const sketch1 = (p) => {
         
         if (isMobile) {
 
-        }
+        }        
         
 
+    }
+
+    function drawLightning() {
+        for (let i = activeLightnings.length - 1; i >= 0; i--) {
+            let l = activeLightnings[i];
+            p.push();
+            p.blendMode(p.ADD);
+            p.tint(255, 20); // Low alpha for a subtle blend effect
+            p.image(l.img, l.x, l.y, l.w, l.h);
+            p.pop();
+            l.life--;
+            if (l.life <= 0) {
+                activeLightnings.splice(i, 1);
+            }
+        }
     }
 };
 

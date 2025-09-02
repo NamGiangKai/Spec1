@@ -13,7 +13,7 @@ const soundModule = (p) => {
         
         try {
             // Load background music tracks
-            const backgroundTracks = ['test.wav', 'test2.wav'];
+            const backgroundTracks = ['test.wav', 'test2.wav', 'test 3.wav'];
             let randomTrack = p.random(backgroundTracks);
             console.log(`🎵 Loading background track: ${randomTrack}`);
             
@@ -28,7 +28,7 @@ const soundModule = (p) => {
             );
 
             // Load click sound tracks
-            const clickTracks = ['sound1.wav', 'sound4.wav'];
+            const clickTracks = ['sound1.wav', 'sound4.wav', 'sound3.wav', 'sound2.wav'];
             let randomClickSound = p.random(clickTracks);
             console.log(`🎵 Loading click sound: ${randomClickSound}`);
             

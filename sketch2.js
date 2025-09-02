@@ -22,6 +22,15 @@ const sketch2 = (p) => {
     // Bộ đệm đồ họa
     let flowFieldGraphics;
     let pillarGraphics;
+    let staticElementsGraphics; // Buffer cho các đối tượng tĩnh
+
+    // Smoke effect variables
+    const MAX_SMOKE_INSTANCES = 20; // GIỚI HẠN SỐ LƯỢNG HIỆU ỨNG KHÓI
+    let smokeAnimations = []; // Mảng này sẽ chứa TẤT CẢ các hiệu ứng khói đang hoạt động
+    let particles = [];
+    let chars = "------------------";
+    let smokeTime = 0; // Biến thời gian riêng cho khói để tránh xung đột
+    let flowPaths = [];
 
     // Responsive variables
     let isMobile = false;
@@ -303,6 +312,50 @@ const sketch2 = (p) => {
         }
     }
 
+    // Lớp TextParticle (MỚI)
+    class TextParticle {
+        constructor() {
+            this.reset();
+            this.noiseOffset = p.random(1000);
+        }
+
+        reset() {
+            const pillarWidth = 200;
+            this.pos = p.createVector(
+                p.width / 2 + p.random(-pillarWidth / 2, pillarWidth / 2),
+                p.random(p.height, p.height + 100) // Vị trí ở đáy
+            );
+            this.vel = p.createVector(0, p.random(-1, -3));
+            this.size = p.random(6, 12);
+            this.alpha = p.random(100, 255);
+            this.life = p.random(200, 400);
+            this.maxLife = this.life;
+            this.char = p.random(chars.split(""));
+        }
+
+        update() {
+            this.pos.add(this.vel);
+            this.pos.x += p.sin(smokeTime + this.noiseOffset) * 0.5;
+            let progress = (p.height - this.pos.y) / p.height; // Logic mới để đảo ngược hiệu ứng
+            this.alpha = p.map(progress, 0, 1, 255, 30);
+            this.size = p.map(progress, 0, 1, 12, 4);
+            if (this.pos.y < -50) {
+                // Điều kiện reset mới
+                this.reset();
+            }
+            this.life--;
+            if (this.life <= 0) {
+                this.reset();
+            }
+        }
+
+        show() {
+            p.fill(255, this.alpha);
+            p.textSize(this.size);
+            p.text(this.char, this.pos.x, this.pos.y);
+        }
+    }
+
     // Function to detect device type and set responsive parameters
     function updateResponsiveParams() {
         const width = p.width;
@@ -379,6 +432,18 @@ const sketch2 = (p) => {
         // Create graphics buffers
         flowFieldGraphics = p.createGraphics(p.width, p.height);
         pillarGraphics = p.createGraphics(p.width, p.height);
+        staticElementsGraphics = p.createGraphics(p.width, p.height);
+        
+        // Initialize smoke effects
+        p.textFont("Source Code Pro");
+        p.textAlign(p.CENTER, p.CENTER);
+        
+        createFlowPaths(); // Tạo các đường dẫn cho khói
+        for (let i = 0; i < 100; i++) {
+            particles.push(new TextParticle()); // Tạo các hạt khói
+        }
+        
+        drawStaticElements(); // Draw static factory elements
         
         // Performance settings
         p.frameRate(maxFPS);
@@ -416,6 +481,12 @@ const sketch2 = (p) => {
                 if (pillarGraphics) {
                     pillarGraphics = p.createGraphics(p.width, p.height);
                 }
+                if (staticElementsGraphics) {
+                    staticElementsGraphics = p.createGraphics(p.width, p.height);
+                    drawStaticElements(); // Redraw static elements
+                }
+                
+                createFlowPaths(); // Recreate flow paths for new size
             }
         }, 100); // 100ms debounce
     };
@@ -426,6 +497,9 @@ const sketch2 = (p) => {
         resetVectorPool(); // Reset object pool each frame
         
         p.background(0, 40);
+        
+        // Display static elements buffer
+        p.image(staticElementsGraphics, 0, 0);
         
         // Adaptive rendering based on performance
         let shouldUpdateFlowField = true;
@@ -441,7 +515,7 @@ const sketch2 = (p) => {
             p.drawFlowField();
         }
         if (shouldUpdatePillar) {
-            p.drawPillar();
+            p.drawPillarAndSmoke(); // Updated function name
         }
         
         p.image(flowFieldGraphics, 0, 0);
@@ -483,7 +557,8 @@ const sketch2 = (p) => {
                 p.image(soundManager.unmuteIcon, muteButtonX, muteButtonY, muteButtonSize, muteButtonSize);
             }
         }
-        time += 0.005;
+        time += 0.005; // Cập nhật thời gian cho con rết
+        smokeTime += 0.02; // Cập nhật thời gian cho khói
         
         // Performance monitoring for debugging
         if (p.frameCount % 120 === 0) {
@@ -522,6 +597,20 @@ const sketch2 = (p) => {
 
                 }
             } else {
+                // --- BẮT ĐẦU TỐI ƯU HÓA ---
+                // Nếu số lượng hiệu ứng trong mảng đã đạt hoặc vượt quá giới hạn
+                if (smokeAnimations.length >= MAX_SMOKE_INSTANCES) {
+                    // .shift() sẽ xóa phần tử đầu tiên (cũ nhất) ra khỏi mảng
+                    smokeAnimations.shift(); 
+                }
+                // --- KẾT THÚC TỐI ƯU HÓA ---
+
+                let newSmokeInstancePaths = createFlowPaths();
+                smokeAnimations.push({ 
+                    paths: newSmokeInstancePaths, 
+                    revealCount: 0
+                });
+                
                 // Phát âm thanh click nếu không bị tắt tiếng
                 if (!isMuted && soundManager) {
                     soundManager.playClickSound();
@@ -578,6 +667,168 @@ const sketch2 = (p) => {
                 soundManager.testSound.setVolume(isMuted ? 0 : 1);
             }
         }
+    };
+    
+    // Function to draw static elements
+    function drawStaticElements() {
+        // Vẽ vào bộ đệm staticElementsGraphics
+        staticElementsGraphics.clear();
+        drawFactory(staticElementsGraphics); // Truyền bộ đệm vào hàm
+        addPillarShading(staticElementsGraphics); // Truyền bộ đệm vào hàm
+    }
+    
+    // --- HÀM MỚI ĐƯỢC THÊM VÀO TỪ CODE CITYSCAPE ---
+    function drawFactory(pg) {
+        const horizonY = pg.height * 0.8;
+        const bottomY = pg.height;
+
+        pg.fill(40, 40, 43, 40);
+        pg.noStroke();
+
+        const w = pg.width;
+        pg.beginShape();
+        pg.vertex(0, bottomY);
+        pg.vertex(0, horizonY);
+        pg.vertex(w * 0.02, horizonY);
+        pg.vertex(w * 0.02, horizonY - 40);
+        pg.vertex(w * 0.045, horizonY - 40);
+        pg.vertex(w * 0.05, horizonY - 54);
+        pg.vertex(w * 0.0725, horizonY - 60);
+        pg.vertex(w * 0.095, horizonY - 54);
+        pg.vertex(w * 0.1, horizonY - 40);
+        pg.vertex(w * 0.115, horizonY - 40);
+        pg.vertex(w * 0.12, horizonY - 54);
+        pg.vertex(w * 0.1425, horizonY - 60);
+        pg.vertex(w * 0.165, horizonY - 54);
+        pg.vertex(w * 0.17, horizonY - 40);
+        pg.vertex(w * 0.1875, horizonY - 40);
+        pg.vertex(w * 0.1875, horizonY - 60);
+        pg.vertex(w * 0.2375, horizonY - 60);
+        pg.vertex(w * 0.2375, horizonY - 40);
+        pg.vertex(w * 0.2575, horizonY - 40);
+        pg.vertex(w * 0.2575, horizonY - 68);
+        pg.vertex(w * 0.2775, horizonY - 68);
+        pg.vertex(w * 0.2775, horizonY - 40);
+        pg.vertex(w * 0.295, horizonY - 40);
+        pg.vertex(w * 0.3, horizonY - 80);
+        pg.vertex(w * 0.3125, horizonY - 104);
+        pg.vertex(w * 0.3325, horizonY - 98);
+        pg.vertex(w * 0.3425, horizonY - 40);
+        pg.vertex(w * 0.3575, horizonY - 40);
+        pg.vertex(w * 0.3575, horizonY - 60);
+        pg.vertex(w * 0.3825, horizonY - 60);
+        pg.vertex(w * 0.3825, horizonY - 40);
+        pg.vertex(w * 0.4025, horizonY - 40);
+        pg.vertex(w * 0.425, horizonY - 60);
+        pg.vertex(w * 0.4625, horizonY - 60);
+        pg.vertex(w * 0.4625, horizonY - 120);
+        pg.vertex(w * 0.4775, horizonY - 120);
+        pg.vertex(w * 0.4775, horizonY - 60);
+        pg.vertex(w * 0.4975, horizonY - 60);
+        pg.vertex(w * 0.4975, horizonY - 138);
+        pg.vertex(w * 0.5275, horizonY - 138);
+        pg.vertex(w * 0.5275, horizonY - 60);
+        
+        pg.vertex(w * 0.885, horizonY - 40);
+        pg.vertex(w * 0.905, horizonY - 40);
+        pg.vertex(w * 0.905, horizonY - 88);
+        pg.vertex(w * 0.955, horizonY - 88);
+        pg.vertex(w * 0.955, horizonY - 40);
+        pg.vertex(w * 0.975, horizonY - 40);
+        pg.vertex(w * 0.975, horizonY - 68);
+        pg.vertex(w * 0.9975, horizonY - 68);
+        pg.vertex(w * 0.9975, horizonY - 40);
+        pg.vertex(w, horizonY);
+        pg.vertex(w, bottomY);
+        pg.endShape(p.CLOSE);
+    }
+    
+    // Smoke effect functions
+    function createFlowPaths() {
+        let newPaths = []; // Tạo một mảng cục bộ cho hiệu ứng mới này
+        const pillarWidth = 120;
+        for (let pathIndex = 0; pathIndex < 10; pathIndex++) {
+            let path = [];
+            let startX = p.random(-pillarWidth * 0.45, pillarWidth * 0.45);
+            let endX = p.random(-pillarWidth * 0.15, pillarWidth * 0.15);
+            for (let y = p.height; y >= -100; y -= 8) {
+                let progress = y / p.height;
+                let x = p.lerp(startX, endX, progress);
+                let curveOffset = p.sin(progress * p.PI * 2 + pathIndex * 0.5) * 30;
+                x += curveOffset;
+                let noiseOffset = p.noise(pathIndex * 100, y * 0.01, smokeTime) * 20;
+                x += noiseOffset;
+                path.push({ x: x + p.width / 2, y: y - 50, density: 1 - progress * 0.3 });
+            }
+            // Thêm vào mảng cục bộ
+            newPaths.push({
+                points: path,
+                speed: p.random(0.8, 2.5),
+                offset: p.random(p.TWO_PI),
+                density: p.random(0.4, 0.9),
+            });
+        }
+        return newPaths; // Trả về bộ đường dẫn vừa tạo
+    }
+    
+    function updateFlowPaths() {
+        for (let i = smokeAnimations.length - 1; i >= 0; i--) {
+            const smokeInstance = smokeAnimations[i];
+            let isInstanceFinished = true;
+
+            // --- BẮT ĐẦU SỬA ĐỔI ---
+            // Tăng dần số lượng ký tự được vẽ để tạo hiệu ứng "mọc" lên
+            // Tốc độ "mọc" có thể điều chỉnh bằng cách thay đổi giá trị cộng thêm (ví dụ: 1.5, 2)
+            smokeInstance.revealCount += 1; 
+            // --- KẾT THÚC SỬA ĐỔI ---
+
+            for (const path of smokeInstance.paths) {
+                for (const point of path.points) {
+                    point.y -= path.speed;
+                }
+                
+                // Truyền revealCount vào hàm vẽ
+                drawTextAlongPath(path, smokeInstance.revealCount);
+
+                if (path.points[0].y > -100) {
+                    isInstanceFinished = false;
+                }
+            }
+
+            if (isInstanceFinished) {
+                smokeAnimations.splice(i, 1);
+            }
+        }
+    }
+    
+    function drawTextAlongPath(path, revealCount) { // Thêm tham số revealCount
+        let charIndex = 0;
+        
+        // --- BẮT ĐẦU SỬA ĐỔI ---
+        // Giới hạn vòng lặp để chỉ vẽ các điểm đã được "tiết lộ"
+        const pointsToDraw = p.min(path.points.length, revealCount);
+        for (let i = 0; i < pointsToDraw; i += 2) { 
+        // --- KẾT THÚC SỬA ĐỔI ---
+            let point = path.points[i];
+            
+            let progress = (p.height - point.y) / p.height;
+            let alpha = p.map(progress, 0, 1, 255, 30);
+            alpha *= path.density;
+            let size = p.map(progress, 0, 1, 14, 6);
+            let char = chars[charIndex % chars.length];
+            let xOffset = p.sin(smokeTime + path.offset + i * 0.1) * 5;
+            let yOffset = p.cos(smokeTime + path.offset + i * 0.1) * 3;
+            p.noStroke();
+            p.fill(255, alpha); 
+            p.textSize(size);
+            p.text(char, point.x + xOffset, point.y + yOffset);
+            charIndex++;
+        }
+    }
+    
+    p.drawPillarAndSmoke = () => {
+        pillarGraphics.clear();
+        updateFlowPaths(); 
     };
     
     // ... (Các hàm phụ trợ còn lại)
@@ -723,7 +974,7 @@ const sketch2 = (p) => {
             }
             pillarGraphics.endShape(p.CLOSE);
         }
-        addPillarShading(pillarGraphics, pillarCenterX - pillarRadius, pillarWidth);
+        addPillarShading(pillarGraphics);
     };
     
     function distSqManual(v1, v2) {
@@ -781,26 +1032,30 @@ const sketch2 = (p) => {
     }
     
     function addPillarShading(pg, x, w) {
+        // If x and w are not provided, use default pillar dimensions
+        if (x === undefined || w === undefined) {
+            const pillarWidth = isMobile ? 120 : isTablet ? 160 : 200;
+            const pillarCenterX = pg.width / 2;
+            x = pillarCenterX - pillarWidth / 2;
+            w = pillarWidth;
+        }
+        
         pg.noStroke();
         let shadowWidth = isMobile ? 60 : isTablet ? 90 : 120;
         for (let i = 0; i < shadowWidth; i++) {
             let alpha = p.map(i, 0, shadowWidth, 180, 0);
             pg.fill(0, alpha);
-            pg.rect(x + i, 0, 1, p.height);
-            pg.rect(x + w - 1 - i, 0, 1, p.height);
+            pg.rect(x + i, 0, 1, pg.height);
+            pg.rect(x + w - 1 - i, 0, 1, pg.height);
         }
         let highlightWidth = isMobile ? 20 : isTablet ? 30 : 40;
         for (let i = 0; i < highlightWidth; i++) {
             let alpha = p.map(i, 0, highlightWidth, 40, 0);
             pg.fill(222, alpha);
-            pg.rect(x + w / 9 - i, 0, 1, p.height);
-            pg.rect(x + w / 8 + i, 0, 1, p.height);
-            pg.rect(x + w / 2 + i, 0, 1, p.height);
-            pg.rect(x + w / 3 + i, 0, 1, p.height);
-            pg.rect(x + w / 4 + i, 0, 1, p.height);
-            pg.rect(x + w / 7 + i, 0, 1, p.height);
-            pg.rect(x + w / 6 + i, 0, 1, p.height);
-            pg.rect(x + w / 2 + i, 0, 1, p.height);
+            pg.rect(x + w / 9 - i, 0, 1, pg.height);
+            pg.rect(x + w / 8 + i, 0, 1, pg.height);
+            pg.rect(x + w / 7 + i, 0, 1, pg.height);
+            pg.rect(x + w / 2 + i, 0, 1, pg.height);
         }
     }
     
@@ -852,23 +1107,13 @@ const sketch2 = (p) => {
             callToActionSize = p.width > 1200 ? 15 : p.width > 800 ? 14 : 12;
         }
         
-        let quote = '"We are facing a man-made disaster on a global scale. Our greatest threat in thousands of years. Climate change."';
-        
-        p.textSize(mainTextSize);
-        p.textStyle(p.BOLD);
-        p.textFont("Source Code Pro");
-        p.textAlign(p.LEFT);
-        p.text(quote, x, y, maxWidth);
-        
-        p.textSize(attributionSize);
-        p.textStyle(p.NORMAL);
-        p.text("— Sir David Attenborough", x + 20, y + 70, maxWidth);
+        // Quote and attribution removed
         
         p.textSize(callToActionSize);
         p.fill("#EB0000");
         p.textStyle(p.BOLD);
         let callToAction = "Cut the fumes, not our breath.";
-        p.text(callToAction, x + 110, y + 300, maxWidth);
+        p.text(callToAction, x + 20, y + 300, maxWidth);
         
         // Additional safety check to prevent text cutoff
         if (x + maxWidth > p.width - 20) {
@@ -878,7 +1123,7 @@ const sketch2 = (p) => {
         // Update quoteBox for hover detection (keeping the existing functionality)
         const tw = p.textWidth(callToAction);
         const th = p.textAscent() + p.textDescent();
-        quoteBox.x = x + 110;
+        quoteBox.x = x + 20;
         quoteBox.y = y + 300 - th;
         quoteBox.w = maxWidth;
         quoteBox.h = th;
