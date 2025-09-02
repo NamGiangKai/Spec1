@@ -14,6 +14,7 @@ const industrialSketch = (p) => {
   let img;
   let ambience, smokeSound, gearSound, pipesSound;
   let muteImg, unmuteImg;
+  let pipeFilter;
 
 
   // =================== GEARS + SMOKE + MINI-GEARS BG + CIRCLE ANIM INSIDE MAIN GEARS + PIPES UNDERLAY ===================
@@ -56,7 +57,7 @@ const industrialSketch = (p) => {
 
   // mini-gears count / placement attempts
   let miniGearsTarget = 200;
-  const MAX_ATTEMPTS     = 30000;
+  const MAX_ATTEMPTS     = 1320;
 
   // main gear centers
   let leftX, rightX, cy;
@@ -94,6 +95,11 @@ const industrialSketch = (p) => {
   let isTablet = false;
   let baseGearRad = 125;
   let baseGearOffset = 150;
+  
+  // Touch handling for mobile gear interaction
+  let lastTouchTime = 0;
+  let touchX = -1000, touchY = -1000; // Off-screen initially
+  const TOUCH_TIMEOUT = 100; // ms after touch ends before hover resets
   
   // Performance optimization variables
   let maxFPS = 60; // Always maintain 60fps
@@ -273,8 +279,14 @@ const industrialSketch = (p) => {
 
     if (pipesSound) {
       pipesSound.setLoop(true);
-      pipesSound.setVolume(0.5);
+      pipesSound.setVolume(0.1);
       pipesSound.rate(1.7);
+      //add reverb
+      pipeFilter = new p5.LowPass(3);
+      pipesSound.disconnect();   // detach from master output
+      pipesSound.connect(pipeFilter); // send through filter
+      pipeFilter.freq(670);      // cutoff (Hz) — lower = more muffled
+      pipeFilter.res(17);         // resonance around cutoff
     }
 
     if (smokeSound) smokeSound.setVolume(1.5);
@@ -327,16 +339,14 @@ const industrialSketch = (p) => {
     audioEnabled = !audioEnabled;
     if (audioEnabled) {
       if (p.getAudioContext().state !== 'running') p.userStartAudio();
-      if (ambience && !ambience.isPlaying()) ambience.loop();
-      if (gearSound && !gearSound.isPlaying()) {
-        gearSound.loop();
-        gearSound.rate(gearRate);
-        gearSound.pan(gearPan);
-      }
-      if (pipesSound && !pipesSound.isPlaying()) pipesSound.loop();
+      if (ambience && !ambience.isPlaying()) ambience.play();
+      if (gearSound && !gearSound.isPlaying()) gearSound.play();
+      // Thêm dòng này để phát pipes.wav
+      if (pipesSound && !pipesSound.isPlaying()) pipesSound.play();
     } else {
       if (ambience && ambience.isPlaying()) ambience.stop();
       if (gearSound && gearSound.isPlaying()) gearSound.stop();
+      // Thêm dòng này để dừng pipes.wav
       if (pipesSound && pipesSound.isPlaying()) pipesSound.stop();
       // smokeSound is one-shot; just prevent future plays while muted
     }
@@ -353,17 +363,56 @@ const industrialSketch = (p) => {
     
     let rect = canvasElement.getBoundingClientRect();
     let touch = event.touches ? event.touches[0] : event;
-    let touchX = touch.clientX - rect.left;
-    let touchY = touch.clientY - rect.top;
+    let currentTouchX = touch.clientX - rect.left;
+    let currentTouchY = touch.clientY - rect.top;
+    
+    // Scale touch coordinates to canvas coordinates
+    let scaleX = p.width / canvasElement.clientWidth;
+    let scaleY = p.height / canvasElement.clientHeight;
+    currentTouchX *= scaleX;
+    currentTouchY *= scaleY;
+    
+    // Update touch tracking for gear hover
+    touchX = currentTouchX;
+    touchY = currentTouchY;
+    lastTouchTime = p.millis();
     
     // Check if touch is on audio button - only prevent default for button interactions
-    if (isOverButton(touchX, touchY)) {
+    if (isOverButton(currentTouchX, currentTouchY)) {
       toggleAudio();
       return false; // Only prevent default for button interactions
     }
     
     // For other touches, allow normal scrolling behavior
     // Don't return false - allow default touch behavior for scrolling
+  };
+
+  // Add touchMoved to track touch movement
+  p.touchMoved = (event) => {
+    let canvasElement = document.getElementById('p5-dekay-canvas');
+    if (!canvasElement) return;
+    
+    let rect = canvasElement.getBoundingClientRect();
+    let touch = event.touches ? event.touches[0] : event;
+    let currentTouchX = touch.clientX - rect.left;
+    let currentTouchY = touch.clientY - rect.top;
+    
+    // Scale touch coordinates to canvas coordinates
+    let scaleX = p.width / canvasElement.clientWidth;
+    let scaleY = p.height / canvasElement.clientHeight;
+    currentTouchX *= scaleX;
+    currentTouchY *= scaleY;
+    
+    // Update touch tracking
+    touchX = currentTouchX;
+    touchY = currentTouchY;
+    lastTouchTime = p.millis();
+  };
+
+  // Add touchEnded to reset touch tracking
+  p.touchEnded = () => {
+    // Don't immediately reset, let the timeout handle it
+    // This allows for a smooth transition back to normal speed
   };
 
   p.draw = () => {
@@ -464,8 +513,31 @@ const industrialSketch = (p) => {
     }
 
     // ---- hover affects spin speed + GEAR SOUND RATE/PAN ----
-    const leftHover  = p.dist(p.mouseX, p.mouseY, leftX,  cy) < gearRad;
-    const rightHover = p.dist(p.mouseX, p.mouseY, rightX, cy) < gearRad;
+    // Use touch coordinates on mobile, mouse coordinates on desktop
+    let currentX, currentY;
+    let isCurrentlyTouching = false;
+    
+    if (isMobile) {
+      // On mobile, check if touch is recent
+      if (p.millis() - lastTouchTime < TOUCH_TIMEOUT) {
+        currentX = touchX;
+        currentY = touchY;
+        isCurrentlyTouching = true;
+      } else {
+        // No recent touch, reset to off-screen position
+        currentX = -1000;
+        currentY = -1000;
+        isCurrentlyTouching = false;
+      }
+    } else {
+      // On desktop, use mouse position
+      currentX = p.mouseX;
+      currentY = p.mouseY;
+      isCurrentlyTouching = true; // Always "touching" with mouse
+    }
+    
+    const leftHover  = p.dist(currentX, currentY, leftX,  cy) < gearRad && isCurrentlyTouching;
+    const rightHover = p.dist(currentX, currentY, rightX, cy) < gearRad && isCurrentlyTouching;
     const hovering   = leftHover || rightHover;
     t += hovering ? 0.08 : 0.03;
 
