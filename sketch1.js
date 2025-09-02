@@ -440,8 +440,9 @@ const sketch1 = (p) => {
         }
     };
     
-    p.mousePressed = function() {
-        // Lần nhấn chuột đầu tiên (bất cứ đâu) để BẮT ĐẦU âm thanh
+    // Function to handle interaction (both mouse and touch)
+    function handleInteraction(x, y) {
+        // Lần nhấn đầu tiên (bất cứ đâu) để BẮT ĐẦU âm thanh
         if (!soundHasStarted) {
             if (sound && sound.isLoaded()) {
                 p.userStartAudio(); // Kích hoạt Audio Context
@@ -463,7 +464,7 @@ const sketch1 = (p) => {
         let buttonX = isMobile ? 20 : isTablet ? 30 : 50;
         let buttonY = isMobile ? 20 : isTablet ? 30 : 50;
         
-        if (p.mouseX > buttonX && p.mouseX < buttonX + buttonSize && p.mouseY > buttonY && p.mouseY < buttonY + buttonSize) {
+        if (x > buttonX && x < buttonX + buttonSize && y > buttonY && y < buttonY + buttonSize) {
             isMuted = !isMuted; // Đảo ngược trạng thái
             if (sound && sound.isLoaded()) {
                 sound.setVolume(isMuted ? 0 : 1);
@@ -475,14 +476,14 @@ const sketch1 = (p) => {
             return;
         }
 
-        // --- Handle clicks on the canvas ---
+        // --- Handle clicks/touches on the canvas ---
 
         // 1. Create the "peel" effect
         let squareSize = 60;
         let squareColor = (bgColor.levels[0] === 255) ? p.color(0) : p.color(255);
         scarSquares.push({
-            x: p.mouseX - squareSize / 2,
-            y: p.mouseY - squareSize / 2,
+            x: x - squareSize / 2,
+            y: y - squareSize / 2,
             size: squareSize,
             col: squareColor
         });
@@ -499,12 +500,12 @@ const sketch1 = (p) => {
         if (lightningImgs.length === 4 && lightningImgs.every(img => img && img.width > 1)) {
             let imgIndex = p.floor(p.random(0, lightningImgs.length));
             let img = lightningImgs[imgIndex];
-            let scaleFactor = 2;
+            let scaleFactor = isMobile ? 1.5 : 2; // Smaller lightning on mobile
             let w = img.width * scaleFactor;
             let h = img.height * scaleFactor;
-            let x = p.random(p.width - w);
-            let y = p.random(p.height - h);
-            activeLightnings.push({ img, x, y, w, h, life: 30 });
+            let lx = p.random(p.width - w);
+            let ly = p.random(p.height - h);
+            activeLightnings.push({ img, x: lx, y: ly, w, h, life: 30 });
             
             // Play lightning sounds if not muted and loaded
             if (!isMuted) {
@@ -523,6 +524,33 @@ const sketch1 = (p) => {
                 }
             }
         }
+    }
+
+    p.mousePressed = function() {
+        handleInteraction(p.mouseX, p.mouseY);
+    };
+
+    // Add touch support for mobile devices
+    p.touchStarted = function(event) {
+        // Get touch coordinates relative to canvas
+        let canvasElement = document.getElementById('p5-canvas-container');
+        if (!canvasElement) return;
+        
+        let rect = canvasElement.getBoundingClientRect();
+        let touch = event.touches ? event.touches[0] : event;
+        let touchX = touch.clientX - rect.left;
+        let touchY = touch.clientY - rect.top;
+        
+        // Scale touch coordinates to canvas coordinates
+        let scaleX = p.width / canvasElement.clientWidth;
+        let scaleY = p.height / canvasElement.clientHeight;
+        touchX *= scaleX;
+        touchY *= scaleY;
+        
+        handleInteraction(touchX, touchY);
+        
+        // Prevent default touch behavior to avoid scrolling
+        return false;
     };
     
     p.keyPressed = function() {
