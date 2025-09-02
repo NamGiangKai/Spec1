@@ -795,8 +795,18 @@ const sketch1 = (p) => {
         for (let i = activeLightnings.length - 1; i >= 0; i--) {
             let l = activeLightnings[i];
             p.push();
-            p.blendMode(p.ADD);
-            p.tint(255, 20); // Low alpha for a subtle blend effect
+            
+            // Different rendering based on background color
+            if (bgColor.levels[0] === 255) {
+                // White background - use normal blend mode with higher alpha for visibility
+                p.blendMode(p.BLEND);
+                p.tint(255, 10); // Higher alpha for white background
+            } else {
+                // Black background - keep original settings
+                p.blendMode(p.ADD);
+                p.tint(255, 20); // Low alpha for subtle blend effect on black
+            }
+            
             p.image(l.img, l.x, l.y, l.w, l.h);
             p.pop();
             l.life--;
