@@ -569,12 +569,25 @@ const sketch2 = (p) => {
     };
 
     p.mousePressed = () => {
+        // Check if click is within canvas bounds
+        let canvasElement = document.getElementById('p5-centipede-canvas');
+        if (!canvasElement) return;
+        
+        let rect = canvasElement.getBoundingClientRect();
+        let mouseX = p.mouseX;
+        let mouseY = p.mouseY;
+        
+        // Only process clicks within canvas area
+        if (mouseX < 0 || mouseX > p.width || mouseY < 0 || mouseY > p.height) {
+            return; // Click is outside canvas, ignore it
+        }
+        
         // Check if click is on mute button with responsive positioning
         let muteButtonSize = isMobile ? 40 : 50;
         let muteButtonX = isMobile ? 15 : 20;
         let muteButtonY = isMobile ? 15 : 20;
         
-        // Lần nhấn chuột đầu tiên (bất cứ đâu) để BẮT ĐẦU âm thanh
+        // Lần nhấn chuột đầu tiên (bất cứ đâu trong canvas) để BẮT ĐẦU âm thanh
         if (!soundHasStarted) {
             if (soundManager && soundManager.testSound && soundManager.testSound.isLoaded()) {
                 p.userStartAudio(); // Kích hoạt Audio Context
@@ -582,39 +595,36 @@ const sketch2 = (p) => {
                 isMuted = false; // Bỏ tắt tiếng
                 soundManager.testSound.setVolume(1);
                 soundHasStarted = true; // Đánh dấu là âm thanh đã bắt đầu
-
-            } else {
-
             }
+            return;
         }
+        
         // Các lần nhấn chuột SAU ĐÓ chỉ để BẬT/TẮT tiếng khi nhấn vào icon
-        else {
-            if (p.mouseX > muteButtonX && p.mouseX < muteButtonX + muteButtonSize && 
-                p.mouseY > muteButtonY && p.mouseY < muteButtonY + muteButtonSize) {
-                isMuted = !isMuted; // Đảo ngược trạng thái
-                if (soundManager && soundManager.testSound && soundManager.testSound.isLoaded()) {
-                    soundManager.testSound.setVolume(isMuted ? 0 : 1);
+        if (mouseX > muteButtonX && mouseX < muteButtonX + muteButtonSize && 
+            mouseY > muteButtonY && mouseY < muteButtonY + muteButtonSize) {
+            isMuted = !isMuted; // Đảo ngược trạng thái
+            if (soundManager && soundManager.testSound && soundManager.testSound.isLoaded()) {
+                soundManager.testSound.setVolume(isMuted ? 0 : 1);
+            }
+        } else {
+            // Only create smoke effects if click is within canvas and not on button
+            // --- BẮT ĐẦU TỐI ƯU HÓA ---
+            // Nếu số lượng hiệu ứng trong mảng đã đạt hoặc vượt quá giới hạn
+            if (smokeAnimations.length >= MAX_SMOKE_INSTANCES) {
+                // .shift() sẽ xóa phần tử đầu tiên (cũ nhất) ra khỏi mảng
+                smokeAnimations.shift(); 
+            }
+            // --- KẾT THÚC TỐI ƯU HÓA ---
 
-                }
-            } else {
-                // --- BẮT ĐẦU TỐI ƯU HÓA ---
-                // Nếu số lượng hiệu ứng trong mảng đã đạt hoặc vượt quá giới hạn
-                if (smokeAnimations.length >= MAX_SMOKE_INSTANCES) {
-                    // .shift() sẽ xóa phần tử đầu tiên (cũ nhất) ra khỏi mảng
-                    smokeAnimations.shift(); 
-                }
-                // --- KẾT THÚC TỐI ƯU HÓA ---
-
-                let newSmokeInstancePaths = createFlowPaths();
-                smokeAnimations.push({ 
-                    paths: newSmokeInstancePaths, 
-                    revealCount: 0
-                });
-                
-                // Phát âm thanh click nếu không bị tắt tiếng
-                if (!isMuted && soundManager) {
-                    soundManager.playClickSound();
-                }
+            let newSmokeInstancePaths = createFlowPaths();
+            smokeAnimations.push({ 
+                paths: newSmokeInstancePaths, 
+                revealCount: 0
+            });
+            
+            // Phát âm thanh click nếu không bị tắt tiếng
+            if (!isMuted && soundManager) {
+                soundManager.playClickSound();
             }
         }
     };
@@ -630,6 +640,17 @@ const sketch2 = (p) => {
         let touchX = touch.clientX - rect.left;
         let touchY = touch.clientY - rect.top;
         
+        // Scale touch coordinates to canvas coordinates
+        let scaleX = p.width / canvasElement.clientWidth;
+        let scaleY = p.height / canvasElement.clientHeight;
+        touchX *= scaleX;
+        touchY *= scaleY;
+        
+        // Only process touches within canvas area
+        if (touchX < 0 || touchX > p.width || touchY < 0 || touchY > p.height) {
+            return; // Touch is outside canvas, allow default behavior
+        }
+        
         // Check if touch is on mute button - only prevent default for button interactions
         let muteButtonSize = isMobile ? 40 : 50;
         let muteButtonX = isMobile ? 15 : 20;
@@ -641,7 +662,7 @@ const sketch2 = (p) => {
             return false; // Only prevent default for button interactions
         }
         
-        // For other touches, allow normal scrolling behavior
+        // For canvas touches (not on button), create smoke effects but allow scrolling
         p.mousePressed();
         // Don't return false - allow default touch behavior for scrolling
     };
