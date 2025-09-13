@@ -268,6 +268,21 @@ html {
     margin-top: 0;
 }
 
+.section-attribution {
+    font-family: "Source Code Pro", monospace;
+    font-size: 14px;
+    font-weight: 400;
+    opacity: 1;
+    margin-top: -0.3rem;
+    margin-bottom: 1rem;
+    text-align: left;
+    width: 100%;
+    color: white;
+    word-wrap: break-word;
+    line-height: 1.4;
+    padding-left: 0;
+}
+
 .section-paragraph {
     font-family: "Source Code Pro", monospace;
     font-size: 17.75px;
@@ -597,6 +612,14 @@ html {
         margin-bottom: 1rem;
     }
 
+    .section-attribution {
+        font-size: 12px;
+        padding-left: 0;
+        max-width: 100%;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
     .section-paragraph {
         font-size: 16px;
         padding-left: 0;
@@ -883,6 +906,16 @@ html {
         max-width: 100%;
     }
 
+    .section-attribution {
+        font-size: 0.7rem;
+        text-align: left;
+        padding-left: 0;
+        margin-top: 0.5rem;
+        max-width: 100%;
+        line-height: 1.3;
+        margin-bottom: 0.5rem;
+    }
+
     .section-paragraph {
         font-size: 0.8rem;
         text-align: left;
@@ -1134,6 +1167,12 @@ html {
         font-size: 1rem;
         text-align: center;
         width: 100%;
+    }
+
+    .section-attribution {
+        font-size: 0.6rem;
+        margin-top: 0.3rem;
+        margin-bottom: 0.3rem;
     }
 
     .section-paragraph {
