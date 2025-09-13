@@ -174,7 +174,7 @@ html {
 }
 
 .quote-attribution {
-    font-family: "Acumin Pro Wide", sans-serif;
+    font-family: 'Source Code Pro', monospace;
     font-size: 0.8rem;
     font-weight: 400;
     color: #fff;
