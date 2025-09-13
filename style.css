@@ -254,7 +254,7 @@ html {
 }
 
 .section-title {
-    font-size: 28px;
+    font-size: 26px;
     font-family: 'Source Code Pro', monospace;
     font-weight: 400;
     letter-spacing: 2px;
@@ -577,7 +577,7 @@ html {
 
     .title-container {
         flex: 1;
-        margin-left: 2rem;
+        margin-left: 0rem;
     }
 
     .top-row {
@@ -589,7 +589,7 @@ html {
     }
 
     .section-title {
-        font-size: 24px;
+        font-size: 20px;
         margin-left: 0;
         width: 100%;
         max-width: 100%;
@@ -695,6 +695,7 @@ html {
     .logo-container {
         margin-left: 0;
         order: 2;
+        font-size: 1.2rem;
     }
 
     .dekay-logo {
@@ -873,13 +874,11 @@ html {
         flex: 1;
         justify-content: flex-start;
         margin-top: 2rem;
-        margin-left: 1rem;
     }
 
     .section-title {
-        font-size: 1.4rem;
-        margin: 0 0 1rem 0;
-        text-align: left;
+        font-size: 1rem;
+        text-align: center;
         width: 100%;
         max-width: 100%;
     }
@@ -1132,13 +1131,13 @@ html {
     }
 
     .section-title {
-        font-size: 1.2rem;
-        margin-left: 1rem;
-        margin-top: 0;
+        font-size: 1rem;
+        text-align: center;
+        width: 100%;
     }
 
     .section-paragraph {
-        font-size: 0.9rem;
+        font-size: 0.65rem;
     }
 
     .section-extra {
@@ -1216,9 +1215,6 @@ html {
 
     .section-title {
         font-size: 1.2rem;
-        margin: 1rem 0;
-        margin-left: 1rem;
-        margin-top: 0;
     }
 
     .section-paragraph {
