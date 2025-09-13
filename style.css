@@ -668,19 +668,6 @@ html {
     .site-footer .student-id {
         font-size: 0.7rem;
     }
-
-    /* Artwork containers tablet */
-    .artwork-container {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .artwork-overlay {
-        order: -1;
-        position: relative;
-        background-color: rgba(0, 0, 0, 0.7);
-        padding: 30px;
-    }
 }
 
 /* Mobile - thay đổi layout hoàn toàn */
@@ -951,6 +938,7 @@ html {
         margin-top: 0;
         max-width: 100%;
         overflow: hidden;
+        order: 2;
     }
 
     .artwork-overlay {
@@ -962,7 +950,7 @@ html {
         flex-direction: column;
         justify-content: flex-start;
         gap: 2rem;
-        order: -1;
+        order: 1;
         background-color: rgba(0, 0, 0, 0.8);
         z-index: 5;
     }
@@ -972,6 +960,7 @@ html {
         margin: 1rem 0;
         max-width: 100%;
         text-align: center;
+        order: 2;
     }
 
     .artwork-title {
@@ -981,6 +970,7 @@ html {
         visibility: visible;
         opacity: 1;
         z-index: 10;
+        order: 1;
     }
 
     .artwork-title .title-line-1 {
