@@ -153,10 +153,12 @@ html {
     text-align: center;
     z-index: 10;
     pointer-events: none;
+    margin: 0 auto;
+    max-width: 600px;
 }
 
 .quote-text {
-    font-family: 'Source Code Pro', monospace;
+    font-family: "Acumin Pro Wide", sans-serif;
     font-size: 1.1rem;
     text-align: center;
     font-weight: bold;
@@ -172,7 +174,7 @@ html {
 }
 
 .quote-attribution {
-    font-family: 'Source Code Pro', monospace;
+    font-family: "Acumin Pro Wide", sans-serif;
     font-size: 0.8rem;
     font-weight: 400;
     color: #fff;
@@ -391,6 +393,7 @@ html {
 .site-footer .title-wrapper {
     position: relative;
     width: 100%;
+    z-index: 1;
 }
 
 .site-footer .student-info-container {
@@ -632,6 +635,11 @@ html {
         letter-spacing: 2px;
     }
 
+    .site-footer .title-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
     .site-footer .main-title {
         font-size: 10rem;
     }
@@ -647,18 +655,18 @@ html {
         transform: translate(-50%, -50%);
         z-index: 10;
         width: 90%;
-        max-width: 900px;
+        max-width: 800px;
         display: flex;
         justify-content: space-between;
         gap: 0;
     }
 
     .site-footer .student-name {
-        font-size: 1rem;
+        font-size: 0.8rem;
     }
 
     .site-footer .student-id {
-        font-size: 0.9rem;
+        font-size: 0.7rem;
     }
 }
 
@@ -761,24 +769,36 @@ html {
 
     .student-column {
         min-width: auto;
-        text-align: center;
+        text-align: left;
         flex: 0 1 auto;
-        max-width: 200px;
     }
 
     .site-footer .student-column {
         text-align: center;
-        flex: 0 1 auto;
-        min-width: auto;
-        max-width: 150px;
+        flex: 1;
+        min-width: 0;
+        max-width: 33.33%;
     }
 
     .site-footer .student-name {
-        font-size: 0.9rem;
+        font-size: 0.7rem;
     }
 
     .site-footer .student-id {
-        font-size: 0.8rem;
+        font-size: 0.6rem;
+    }
+
+    .site-footer .student-info-container {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 10 !important;
+        width: 95%;
+        display: flex;
+        justify-content: space-between;
+        gap: 0;
+        margin: 0 !important;
     }
 
     #student3,
@@ -994,6 +1014,11 @@ html {
         letter-spacing: 1px;
     }
 
+    .site-footer .title-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
     .site-footer .main-title {
         font-size: 6rem;
         margin: 1rem 0;
@@ -1004,17 +1029,31 @@ html {
     }
 
     .site-footer .student-info-container {
-        margin-bottom: 1rem;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 10;
-        width: 90%;
-        max-width: 800px;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 10 !important;
+        width: 92%;
         display: flex;
         justify-content: space-between;
         gap: 0;
+        margin: 0 !important;
+    }
+
+    .site-footer .student-column {
+        text-align: center;
+        flex: 1;
+        min-width: 0;
+        max-width: 33.33%;
+    }
+
+    .site-footer .student-name {
+        font-size: 0.5rem;
+    }
+
+    .site-footer .student-id {
+        font-size: 0.45rem;
     }
 
     /* Bottom school info mobile */
@@ -1022,6 +1061,45 @@ html {
         padding: 1rem;
         font-size: 0.7rem;
         margin-top: 1rem;
+    }
+}
+
+@media (max-width: 450px) {
+    .site-footer .main-title {
+        font-size: 5rem;
+        margin: 1rem 0;
+    }
+
+    .site-footer .student-info-container {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 10 !important;
+        width: 95%;
+        display: flex;
+        justify-content: space-between;
+        gap: 0;
+        margin: 0 !important;
+    }
+
+    .site-footer .student-column {
+        text-align: center;
+        flex: 1;
+        min-width: 0;
+        max-width: 33.33%;
+    }
+
+    .site-footer .student-name {
+        font-size: 0.45rem;
+    }
+
+    .site-footer .student-id {
+        font-size: 0.4rem;
+    }
+
+    .site-footer {
+        min-height: 250px;
     }
 }
 
